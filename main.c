@@ -1,0 +1,56 @@
+#include "ft_nmap.h"
+
+void print_help()
+{
+	printf("Help Screen\n");
+	printf("Usage:	ft_nmap [--ports [NUMBER/RANGED]] --ip IP_ADDRESS [--speedup [NUMBER] [--scan [TYPE]]\n");
+	printf("or:		ft_nmap [--ports [NUMBER/RANGED]] --file FILE [--speedup [NUMBER] [--scan [TYPE]]\n");
+	printf("--help      Print this help screen\n");
+	printf("--port      Ports to scan (eg: 1-10 or 1,2,3 or 1,5-15)\n");
+	printf("--ip        ip addresses to scan in do fromat (IPv4)\n");
+	printf("--file      File name containing IP addresses to scan\n");
+	printf("--speedup   [250 max] number of parallel threads to use\n");
+	printf("--scan      SYN/NULL/FIN/XMAS/ACK/UDP\n");
+	exit(0);
+}
+
+int main(int argc, char **argv)
+{
+	int		i;
+	bool	ipaddr;
+
+	i = 1;
+	ipaddr = false;
+	// handles ./ft_nmap & ./ft_nmap --help
+	if (argc == 1 || (argc == 2 && !strcmp("--help", argv[1])))
+		print_help();
+	if (argc % 2 == 0)
+		print_help();
+	while (argc > i)
+	{
+		if (!strcmp(argv[i], "--ip"))
+		{
+			if (ipaddr)
+				print_help();
+			parse_ip(argv[i + 1]);
+			ipaddr = true;
+		}
+		else if (!strcmp(argv[i], "--file"))
+		{
+			if (ipaddr)
+				print_help();
+			parse_ip_file(argv[i + 1]);
+			ipaddr = true;
+		}
+		else if (!strcmp(argv[i], "--speedup"))
+			parse_speedup(argv[i + 1]);
+		else if (!strcmp(argv[i], "--scan"))
+			parse_scan(argv[i + 1]);
+		else if (!strcmp(argv[i], "--ports"))
+			parse_ports(argv[i + 1]);
+		else
+			print_help();
+		i += 2;
+	}
+	return 0;
+}
