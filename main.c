@@ -31,26 +31,31 @@ int main(int argc, char **argv)
 		if (!strcmp(argv[i], "--ip"))
 		{
 			if (ipaddr)
+			{
+				printf("Error: only use --file or --ip\n");
 				print_help();
+			}
 			parse_ip(argv[i + 1]);
 			ipaddr = true;
 		}
 		else if (!strcmp(argv[i], "--file"))
 		{
 			if (ipaddr)
+			{
+				printf("Error: only use --file or --ip\n");
 				print_help();
+			}
 			parse_ip_file(argv[i + 1]);
 			ipaddr = true;
 		}
-		else if (!strcmp(argv[i], "--speedup"))
-			parse_speedup(argv[i + 1]);
-		else if (!strcmp(argv[i], "--scan"))
-			parse_scan(argv[i + 1]);
-		else if (!strcmp(argv[i], "--ports"))
-			parse_ports(argv[i + 1]);
+		else if (!strcmp(argv[i], "--speedup") && parse_speedup(argv[i + 1]));
+		else if (!strcmp(argv[i], "--scan") && parse_scan(argv[i + 1]));
+		else if (!strcmp(argv[i], "--ports") && parse_ports(argv[i + 1]));
 		else
 			print_help();
 		i += 2;
 	}
+	if (!ipaddr)
+		print_help();
 	return 0;
 }

@@ -1,4 +1,5 @@
-SRC = ./main.c ./parser/parser.c ./parser/outils.c ./parser/ft_split.c
+SRC = ./main.c ./parser/parser.c ./parser/outils.c ./parser/ft_split.c \
+	  ./parser/ip_file_parse.c ./parser/gnl.c 
 
 OBJ = $(SRC:.c=.o)
 

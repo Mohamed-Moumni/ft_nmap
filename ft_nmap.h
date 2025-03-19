@@ -53,6 +53,11 @@ bool    parse_scan(char *param);
 bool    parse_ports(char    *param);
 
 char	**ft_split(char const *s, char c);
-bool validate_ipaddr(char **splited);
+bool	validate_ipaddr(char **splited);
+int		ft_isnum(char *str);
+int		ft_d_strlen(char **av);
+bool	parse_ip_hostname(char *param);
+char	*get_next_line(int fd);
+
 
 #endif

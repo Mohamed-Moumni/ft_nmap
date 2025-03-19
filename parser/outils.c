@@ -26,3 +26,13 @@ bool validate_ipaddr(char **splited){
 		return false;
 	return true;
 }
+
+int	ft_d_strlen(char **av)
+{
+	int	i;
+
+	i = 0;
+	while (av[i])
+		i++;
+	return (i);
+}
