@@ -1,6 +1,6 @@
 #include "../ft_nmap.h"
 
-bool    parse_ip(char   *param)
+bool    parse_ip(char   *param, t_input *input)
 {
     char **splited = ft_split(param, '.');
     if (!validate_ipaddr(splited))
@@ -8,10 +8,15 @@ bool    parse_ip(char   *param)
         printf("ip: Invalid IP address\n");
         return (false);
     }
+    struct sockaddr_in *server_addr = malloc(sizeof(struct sockadd_in *));
+    server_addr->sin_family = AF_INET;
+    if (inet_pton(AF_INET, param, &server_addr->sin_addr) <= 0)
+        fprintf(stderr, "error number %i inet_pton\n", errno);
+    add_node(&(input->ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr));
     return true;
 }
 
-bool    parse_ip_file(char  *param)
+bool    parse_ip_file(char  *param, t_input *input)
 {
     int fd = open(param, O_RDONLY);
     if (fd < 0)
@@ -22,7 +27,7 @@ bool    parse_ip_file(char  *param)
     char *line = get_next_line(fd);
     while (line)
     {
-        if (!parse_ip_hostname(line))
+        if (!parse_ip_hostname(line, input))
         {
             printf("ip file: Invalid IP file\n");
             return (false);
@@ -32,7 +37,7 @@ bool    parse_ip_file(char  *param)
     return true;
 }
 
-bool    parse_speedup(char  *param)
+bool    parse_speedup(char  *param, t_input *input)
 {
     if (!ft_isnum(param))
     {
@@ -45,10 +50,11 @@ bool    parse_speedup(char  *param)
         printf("speedup: Invalid speedup value\n");
         return (false);
     }
+    input->thread_count = speedup;
     return true;
 }
 
-bool    parse_scan(char *param)
+bool    parse_scan(char *param, t_input *input)
 {
     char    *scans = "SYN/NULL/FIN/XMAS/ACK/UDP";
     char    *ptr_pos = strstr(scans, param);
@@ -57,11 +63,12 @@ bool    parse_scan(char *param)
         printf("scan: Invalid scan value\n");
         return (false);
     }
-    int     index_pos = ptr_pos - scans;
+    int     index_pos = (int)(ptr_pos - scans);
+    input->scan = index_pos;
     return true;
 }
 
-bool    parse_ports(char    *param)
+bool    parse_ports(char    *param, t_input *input)
 {
     int min = 0;
     int max = 0;
@@ -93,5 +100,7 @@ bool    parse_ports(char    *param)
         printf("ports: Invalid ports value (min = 1, max = 1024)\n");
         return (false);
     }
+    input->port_range = result;
+    input->port_start = min;
     return true;
-}
+}   

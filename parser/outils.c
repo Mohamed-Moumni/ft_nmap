@@ -15,6 +15,8 @@ int	ft_isnum(char *str)
 bool validate_ipaddr(char **splited){
 	int i = 0;
 	while (splited[i]) {
+		if (ft_isnum(splited[i]))
+			return false;
 		int ip_byte = atoi(splited[i]);
 		if (ip_byte == 0 && strcmp(splited[i], "0"))
 			return false;

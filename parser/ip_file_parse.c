@@ -12,7 +12,7 @@ void free_two_demension(char **to_free){
 	free(to_free);
 }
 
-bool	validate_hostname(char *param)
+bool	validate_hostname(char *param, t_input *input)
 {
 	struct addrinfo	hints;
 	struct addrinfo	*res;
@@ -40,8 +40,7 @@ bool	validate_hostname(char *param)
 		struct sockaddr_in *addr_in = (struct sockaddr_in *)res->ai_addr;
 		if (inet_ntop(res->ai_family, &addr_in->sin_addr.s_addr, ip, 32))
 		{
-			printf("all good with host %s\n", param);
-			printf("ip: %s\n", ip);
+			add_node(&((*input).ipaddr), strdup(ip), res->ai_addr, res->ai_addrlen);
 			// I need to store the ip
 			return true;
 		}
@@ -50,7 +49,7 @@ bool	validate_hostname(char *param)
 	return false;
 }
 
-bool	parse_ip_hostname(char *param)
+bool	parse_ip_hostname(char *param, t_input *input)
 {
 	char	**splited;
 	struct timeval	timeout;
@@ -67,11 +66,11 @@ bool	parse_ip_hostname(char *param)
 		server_addr->sin_family = AF_INET;
 		if (inet_pton(AF_INET, param, &server_addr->sin_addr) <= 0)
 			fprintf(stderr, "error number %i inet_pton\n", errno);
-		printf("ip: %s\n", param);
+		add_node(&((*input).ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr));
 		// I need to store those values
 	}
 	else {
-		return (validate_hostname(param));
+		return (validate_hostname(param, input));
 	}
 	free_two_demension(splited);
 	return true;
