@@ -85,7 +85,7 @@ bool    parse_ports(char    *param, t_input *input)
         }
         min = atoi(splited[0]);
         max = atoi(splited[1]);
-        result = max - min;
+        result = max - min + 1;
     }
     else {
         if (!ft_isnum(param))

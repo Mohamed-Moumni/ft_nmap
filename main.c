@@ -6,7 +6,7 @@ void print_help()
 	printf("Usage:	ft_nmap [--ports [NUMBER/RANGED]] --ip IP_ADDRESS [--speedup [NUMBER] [--scan [TYPE]]\n");
 	printf("or:		ft_nmap [--ports [NUMBER/RANGED]] --file FILE [--speedup [NUMBER] [--scan [TYPE]]\n");
 	printf("--help      Print this help screen\n");
-	printf("--port      Ports to scan (eg: 1-10 or 1,2,3 or 1,5-15)\n");
+	printf("--port      Ports to scan (eg: 1-10 or 10)\n");
 	printf("--ip        ip addresses to scan in do fromat (IPv4)\n");
 	printf("--file      File name containing IP addresses to scan\n");
 	printf("--speedup   [250 max] number of parallel threads to use\n");
