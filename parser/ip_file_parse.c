@@ -40,7 +40,7 @@ bool	validate_hostname(char *param, t_input *input)
 		struct sockaddr_in *addr_in = (struct sockaddr_in *)res->ai_addr;
 		if (inet_ntop(res->ai_family, &addr_in->sin_addr.s_addr, ip, 32))
 		{
-			add_node(&((*input).ipaddr), strdup(ip), res->ai_addr, res->ai_addrlen);
+			add_node(&((*input).ipaddr), strdup(ip), res->ai_addr, res->ai_addrlen, false);
 			// I need to store the ip
 			return true;
 		}
@@ -66,7 +66,7 @@ bool	parse_ip_hostname(char *param, t_input *input)
 		server_addr->sin_family = AF_INET;
 		if (inet_pton(AF_INET, param, &server_addr->sin_addr) <= 0)
 			fprintf(stderr, "error number %i inet_pton\n", errno);
-		add_node(&((*input).ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr));
+		add_node(&((*input).ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr), false);
 		// I need to store those values
 	}
 	else {

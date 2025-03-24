@@ -1,5 +1,5 @@
 SRC = ./main.c ./parser/parser.c ./parser/outils.c ./parser/ft_split.c \
-	  ./parser/ip_file_parse.c ./parser/gnl.c ./parser/ipaddr.c
+	  ./parser/ip_file_parse.c ./parser/gnl.c ./parser/ipaddr.c ./network_mapper/host_discovery.c
 
 OBJ = $(SRC:.c=.o)
 

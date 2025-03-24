@@ -32,6 +32,7 @@ typedef struct s_ipaddr {
 	char			*ip_addr;
 	struct sockaddr *sock_addr;
 	socklen_t       addr_len;
+	bool			discovery;
 	struct s_ipaddr	*next;
 }	t_ipaddr;
 
@@ -59,6 +60,7 @@ typedef struct icmp_header {
 	u_int16_t	sequence;
 }	t_icmp_header;
 
+
 extern t_connect connection;
 
 bool    parse_ip(char   *param, t_input *input);
@@ -74,7 +76,8 @@ int		ft_d_strlen(char **av);
 bool	parse_ip_hostname(char *param, t_input *input);
 char	*get_next_line(int fd);
 
-int		add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_t addrlen);
+int		add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_t addrlen, bool disc);
+bool	host_discovery(t_ipaddr *ip_addr);
 
 
 #endif

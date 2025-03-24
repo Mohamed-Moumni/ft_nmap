@@ -60,13 +60,16 @@ int main(int argc, char **argv)
 				print_help();
 			ipaddr = true;
 		}
-		else if (!strcmp(argv[i], "--speedup") && parse_speedup(argv[i + 1], &input)); // this one handles "--speedup" pay attention to the &&
-		else if (!strcmp(argv[i], "--scan") && parse_scan(argv[i + 1], &input)); // this one handles "--scan" pay attention to the &&
-		else if (!strcmp(argv[i], "--ports") && parse_ports(argv[i + 1], &input)); // this one handles "--ports" pay attention to the &&
+		// this one handles "--speedup" pay attention to the &&
+		else if (!strcmp(argv[i], "--speedup") && parse_speedup(argv[i + 1], &input)); 
+		// this one handles "--scan" pay attention to the &&
+		else if (!strcmp(argv[i], "--scan") && parse_scan(argv[i + 1], &input));
+		// this one handles "--ports" pay attention to the &&
+		else if (!strcmp(argv[i], "--ports") && parse_ports(argv[i + 1], &input));
 		else
 			print_help(); // handle mistaken args
 		// we skip the options value to get to the next key
-		i += 2; 
+		i += 2;
 	}
 	// checks if the required field is there
 	if (!ipaddr)
@@ -74,7 +77,8 @@ int main(int argc, char **argv)
 	printf("scan: %d / ports range: %d start from %d / threads: %d\n", input.scan, input.port_range, input.port_start, input.thread_count);
 	while(input.ipaddr)
 	{
-		printf("ilop: %s\n", input.ipaddr->ip_addr);
+		input.ipaddr->discovery = host_discovery(input.ipaddr);
+		printf("ilop: %s %d\n", input.ipaddr->ip_addr, input.ipaddr->discovery);
 		input.ipaddr = input.ipaddr->next;
 	}
 	return 0;

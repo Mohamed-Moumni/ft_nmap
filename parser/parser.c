@@ -11,8 +11,11 @@ bool    parse_ip(char   *param, t_input *input)
     struct sockaddr_in *server_addr = malloc(sizeof(struct sockadd_in *));
     server_addr->sin_family = AF_INET;
     if (inet_pton(AF_INET, param, &server_addr->sin_addr) <= 0)
+    {
         fprintf(stderr, "error number %i inet_pton\n", errno);
-    add_node(&(input->ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr));
+        return false;
+    }
+    add_node(&(input->ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr), false);
     return true;
 }
 
