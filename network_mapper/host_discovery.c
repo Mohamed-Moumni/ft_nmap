@@ -33,7 +33,7 @@ unsigned short checksum(void *b, int len)
 	return result;
 }
 
-int send_recv(char *packet, t_icmp_header *icmp_header, t_ipaddr *ip_addr)
+int send_recv(char *packet, t_icmp_header *icmp_header, char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len)
 {
 	// long long   start_time;
 	double      timer;
@@ -47,10 +47,10 @@ int send_recv(char *packet, t_icmp_header *icmp_header, t_ipaddr *ip_addr)
 		return false;
 	}
 	// start_time = get_time();
-	ssize_t ret = sendto(sockfd, packet, sizeof(icmp_header) + 56, 0, ip_addr->sock_addr, ip_addr->addr_len);
+	ssize_t ret = sendto(sockfd, packet, sizeof(icmp_header) + 56, 0, sockaddr, addr_len);
 	if (ret  < 0)
 	{
-		printf("sendto error: %ld. ip addr: %s\n", ret, ip_addr->ip_addr);
+		printf("sendto error: %ld. ip addr: %s\n", ret, ipaddr);
 		return false;
 	}
 	struct sockaddr_in reply_addr;
@@ -58,7 +58,7 @@ int send_recv(char *packet, t_icmp_header *icmp_header, t_ipaddr *ip_addr)
 	ssize_t bytes_recv = recvfrom(sockfd, buffer, sizeof(buffer), 0, (struct sockaddr *)&reply_addr, &len);
 	if (bytes_recv < 0)
 	{
-		printf("recvfrom error: %ld. ip addr: %s\n", bytes_recv, ip_addr->ip_addr);
+		printf("recvfrom error: %ld. ip addr: %s\n", bytes_recv, ipaddr);
 		return false;
 	}
 	close(sockfd);
@@ -74,7 +74,7 @@ int send_recv(char *packet, t_icmp_header *icmp_header, t_ipaddr *ip_addr)
 	return false;
 }
 
-bool host_discovery(t_ipaddr *ip_addr)
+bool host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len)
 {
 	t_icmp_header   icmp_header;
 	char            packet[4095];
@@ -91,5 +91,5 @@ bool host_discovery(t_ipaddr *ip_addr)
 	icmp_header.checksum = checksum((unsigned short *)packet, sizeof(icmp_header) + 56);
 	memcpy(packet, &icmp_header, sizeof(icmp_header));
 	memcpy(packet + sizeof(icmp_header), data, 56);
-	return send_recv(packet, &icmp_header, ip_addr);
+	return send_recv(packet, &icmp_header, ipaddr, sockaddr, addr_len);
 }

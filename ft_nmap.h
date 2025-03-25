@@ -77,7 +77,6 @@ bool	parse_ip_hostname(char *param, t_input *input);
 char	*get_next_line(int fd);
 
 int		add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_t addrlen, bool disc);
-bool	host_discovery(t_ipaddr *ip_addr);
-
+bool	host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len);
 
 #endif

@@ -77,7 +77,6 @@ int main(int argc, char **argv)
 	printf("scan: %d / ports range: %d start from %d / threads: %d\n", input.scan, input.port_range, input.port_start, input.thread_count);
 	while(input.ipaddr)
 	{
-		input.ipaddr->discovery = host_discovery(input.ipaddr);
 		printf("ilop: %s %d\n", input.ipaddr->ip_addr, input.ipaddr->discovery);
 		input.ipaddr = input.ipaddr->next;
 	}

@@ -3,6 +3,7 @@
 bool    parse_ip(char   *param, t_input *input)
 {
     char **splited = ft_split(param, '.');
+    bool    discovery;
     if (!validate_ipaddr(splited))
     {
         printf("ip: Invalid IP address\n");
@@ -15,7 +16,9 @@ bool    parse_ip(char   *param, t_input *input)
         fprintf(stderr, "error number %i inet_pton\n", errno);
         return false;
     }
-    add_node(&(input->ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr), false);
+    discovery = host_discovery(param, (struct sockaddr *)server_addr, sizeof(struct sockaddr));
+    add_node(&(input->ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr), discovery);
+
     return true;
 }
 

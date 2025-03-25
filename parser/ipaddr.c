@@ -6,7 +6,7 @@ void    node_init(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, sock
 	(*list)->ip_addr = ipaddr;
     (*list)->sock_addr = sockaddr;
 	(*list)->addr_len = addrlen;
-	(*list)->discovery = false;
+	(*list)->discovery = disc;
 	(*list)->next = NULL;
 }
 
