@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	int		i;
 	bool	ipaddr;
 	t_input	input;
-	
+
 	i = 1;
 	ipaddr = false;
 	// init the input struct
@@ -68,16 +68,24 @@ int main(int argc, char **argv)
 		else if (!strcmp(argv[i], "--ports") && parse_ports(argv[i + 1], &input));
 		else
 			print_help(); // handle mistaken args
-		// we skip the options value to get to the next key
+		// we skip the option's value and get to the next key
 		i += 2;
 	}
-	// checks if the required field is there
+	// checks if the only required field is there
 	if (!ipaddr)
 		print_help();
 	printf("scan: %d / ports range: %d start from %d / threads: %d\n", input.scan, input.port_range, input.port_start, input.thread_count);
 	while(input.ipaddr)
 	{
-		printf("ilop: %s %d\n", input.ipaddr->ip_addr, input.ipaddr->discovery);
+		if (input.ipaddr->discovery)
+		{
+			if (perform_scan(&input, input.ipaddr, input.scan))
+			{
+				printf("error with the scan\n");
+				return 0;
+			}
+			printf("ilop: %s is all good\n", input.ipaddr->ip_addr);
+		}
 		input.ipaddr = input.ipaddr->next;
 	}
 	return 0;

@@ -23,9 +23,9 @@
 #define	ALL_SCAN  -1
 #define	SYN_SCAN  0
 #define NULL_SCAN 4
+#define ACK_SCAN  18
 #define	FIN_SCAN  9
 #define	XMAS_SCAN 13
-#define ACK_SCAN  18
 #define UDP_SCAN  22
 
 typedef struct s_ipaddr {
@@ -78,5 +78,6 @@ char	*get_next_line(int fd);
 
 int		add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_t addrlen, bool disc);
 bool	host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len);
+bool	perform_scan(t_input *input, t_ipaddr *ipaddr, int scan);
 
 #endif
