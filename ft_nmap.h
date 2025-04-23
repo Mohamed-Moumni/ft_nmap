@@ -27,6 +27,8 @@
 #define	FIN_SCAN  9
 #define	XMAS_SCAN 13
 #define UDP_SCAN  22
+#define OPEN 1
+#define CLOSED 0
 
 typedef struct s_ipaddr {
 	char			*ip_addr;
@@ -60,6 +62,29 @@ typedef struct icmp_header {
 	u_int16_t	sequence;
 }	t_icmp_header;
 
+typedef struct s_scan
+{
+	int				type;
+	int				state;
+	struct s_scan	*next;
+}t_scan;
+
+typedef struct s_port
+{
+	int				port_number;
+	int				service;
+	int				category;
+	t_scan			*scans;
+	struct s_port	*next;
+}t_port;
+
+typedef struct s_nmap
+{
+	t_ipaddr			*ipaddr;
+	t_port				*open_ports;
+	t_port				*closed_ports;
+	struct s_nmap		*next;
+}t_nmap;
 
 extern t_connect connection;
 
