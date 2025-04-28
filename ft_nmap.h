@@ -2,7 +2,7 @@
 # define FTNMAP_H
 
 #include <stdio.h>
-# include <unistd.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -14,6 +14,7 @@
 #include <netinet/ip_icmp.h>
 #include <netinet/ip.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <time.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -62,11 +63,16 @@ typedef struct icmp_header {
 	u_int16_t	sequence;
 }	t_icmp_header;
 
+typedef struct s_list
+{
+	void	*data;
+	struct s_list *next;
+} t_list;
+
 typedef struct s_scan
 {
 	int				type;
 	int				state;
-	struct s_scan	*next;
 }t_scan;
 
 typedef struct s_port
@@ -75,7 +81,6 @@ typedef struct s_port
 	int				service;
 	int				category;
 	t_scan			*scans;
-	struct s_port	*next;
 }t_port;
 
 typedef struct s_nmap
@@ -83,7 +88,6 @@ typedef struct s_nmap
 	t_ipaddr			*ipaddr;
 	t_port				*open_ports;
 	t_port				*closed_ports;
-	struct s_nmap		*next;
 }t_nmap;
 
 extern t_connect connection;
@@ -104,5 +108,18 @@ char	*get_next_line(int fd);
 int		add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_t addrlen, bool disc);
 bool	host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len);
 bool	perform_scan(t_input *input, t_ipaddr *ipaddr, int scan);
+void	error_print(char *error_msg);
+
+// list methods
+t_list	*list_new(void *data, size_t data_size);
+void	list_add(t_list **list_item);
+
+// nmap strucuts
+t_scan *create_scan(int type);
+t_port *create_port(int port_nb);
+t_nmap *create_nmap(t_ipaddr *ipaddr);
+
+// crafting the tcp header
+char *tcp_header(int tcp_byte);
 
 #endif
