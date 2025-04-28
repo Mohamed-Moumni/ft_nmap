@@ -65,7 +65,7 @@ t_port  *create_port(int port_nb)
     return port;
 }
 
-t_nmap  *create_nmap(t_ipaddr *ipaddr)
+t_nmap  *create_nmap_node(t_ipaddr *ipaddr)
 {
     t_nmap *nmap = malloc(sizeof(t_nmap));
     if (!nmap)
@@ -79,7 +79,6 @@ t_nmap  *create_nmap(t_ipaddr *ipaddr)
 
 // char *tcp_header(int tcp_byte)
 // {
-//     struct tcphdr *tcp_header;
-
-//     tcp_header
+    // struct tcphdr *tcp_header;
+// 
 // }

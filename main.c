@@ -19,9 +19,15 @@ int main(int argc, char **argv)
 	int		i;
 	bool	ipaddr;
 	t_input	input;
+	t_list	*nmap;
+	t_nmap	*nmap_node;
+	t_list 	*nmap_list_node;
+	t_list	*threads;
+
 
 	i = 1;
 	ipaddr = false;
+	nmap = NULL;
 	// init the input struct
 	input.scan = ALL_SCAN;
 	input.ipaddr = NULL;
@@ -79,12 +85,29 @@ int main(int argc, char **argv)
 	{
 		if (input.ipaddr->discovery)
 		{
-			if (perform_scan(&input, input.ipaddr, input.scan))
+			threads = NULL;
+			nmap_node = create_nmap_node(&input.ipaddr);
+			nmap_list_node = list_new(nmap_node, sizeof(t_list));
+			// iterate through the threads
+			for (int i = 0; i < input.thread_count; i++)
 			{
-				printf("error with the scan\n");
-				return 0;
+				pthread_t *thread;
+
+				thread = malloc(sizeof(pthread_t));
+				list_add(&threads, list_new(&thread, sizeof(pthread_t *)));
+				t_routine_arg routine_arg;
+				// create the thread
+				int error = pthread_create(thread, NULL, thread_routine, &routine_arg);
+				if (error != 0)
+				{
+					error_print(strerror(error));
+					exit(1);
+				}	
 			}
-			printf("ilop: %s is all good\n", input.ipaddr->ip_addr);
+			// join the threads (wait for all threads to finish)
+			join_threads(threads);
+			list_free(&threads);
+			list_add(&nmap, nmap_list_node);
 		}
 		input.ipaddr = input.ipaddr->next;
 	}
