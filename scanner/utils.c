@@ -5,7 +5,7 @@ void	error_print(char *error_msg)
     printf("%s\n", error_msg);
 }
 
-t_list *list_new(void *data, size_t data_size)
+t_list  *list_new(void *data, size_t data_size)
 {
     t_list *new_item = malloc(sizeof(t_list));
     if (!new_item)
@@ -13,7 +13,7 @@ t_list *list_new(void *data, size_t data_size)
         error_print("Memory allocation error: New List Item can't be allocated");
         exit(1);
     }
-    void *data = malloc(sizeof(data_size));
+    void *data = malloc(data_size);
     if (!data)
     {
         error_print("Memory allocation error: New Data Item can't be allocated");
@@ -24,7 +24,7 @@ t_list *list_new(void *data, size_t data_size)
     return new_item;
 }
 
-void list_add(t_list **list, t_list *new_item)
+void    list_add(t_list **list, t_list *new_item)
 {
     t_list *temp_item;
 
@@ -39,6 +39,22 @@ void list_add(t_list **list, t_list *new_item)
         }
         temp_item = new_item;
     }
+}
+
+void    list_free(t_list **list_item)
+{
+    t_list *list_temp;
+    t_list *list_item_to_free;
+
+    list_temp = *list_item;
+    while (list_temp)
+    {
+        list_item_to_free = list_temp;
+        list_temp = list_temp->next;
+        free(list_item_to_free);
+    }
+    if (list_item)
+        free(list_item);
 }
 
 t_scan  *create_scan(int type)

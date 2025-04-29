@@ -123,9 +123,10 @@ void	list_add(t_list **list_item, t_list *new_item);
 void	list_free(t_list **list_tem);
 
 // nmap strucuts
-t_scan *create_scan(int type);
-t_port *create_port(int port_nb);
-t_nmap *create_nmap_node(t_ipaddr *ipaddr);
+t_scan	*create_scan(int type);
+t_port	*create_port(int port_nb);
+t_nmap	*create_nmap_node(t_ipaddr *ipaddr);
+void	nmap_loop(t_input *nmap_input);
 
 // crafting the tcp header
 char *tcp_header(int tcp_byte);

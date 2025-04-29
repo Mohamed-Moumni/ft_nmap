@@ -2,11 +2,17 @@
 
 void* thread_routine(void* arg)
 { 
-    t_routine_arg   *routine_arg;
+    printf("Thread Routine");
+    // t_routine_arg   *routine_arg;
 
-    routine_arg = (t_routine_arg *)arg;
+    // routine_arg = (t_routine_arg *)arg;
     // starting the process of port scanning for the start to the end
     // for each port do the available scan that should performed
+    // while (routine_arg->start_port <= routine_arg->end_port)
+    // {
+
+    //     routine_arg->start_port++;
+    // }
 }
 
 void join_threads(t_list *threads)
