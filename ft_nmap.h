@@ -20,6 +20,7 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <math.h>
+#include <pthread.h>
 
 #define	ALL_SCAN  -1
 #define	SYN_SCAN  0
@@ -47,6 +48,12 @@ typedef struct s_input {
 	t_ipaddr	*ipaddr;
 }	t_input;
 
+typedef struct s_routine_arg {
+	int start_port;
+	int end_port;
+	int scan;
+} t_routine_arg;
+
 typedef struct s_connect {
 	char			*argv;
 	char            *ip_addr;
@@ -67,13 +74,13 @@ typedef struct s_list
 {
 	void	*data;
 	struct s_list *next;
-}	t_list;
+} t_list;
 
 typedef struct s_scan
 {
 	int				type;
 	int				state;
-}	t_scan;
+}t_scan;
 
 typedef struct s_port
 {
@@ -81,14 +88,14 @@ typedef struct s_port
 	int				service;
 	int				category;
 	t_scan			*scans;
-}	t_port;
+}t_port;
 
 typedef struct s_nmap
 {
 	t_ipaddr			*ipaddr;
 	t_port				*open_ports;
 	t_port				*closed_ports;
-}	t_nmap;
+}t_nmap;
 
 extern t_connect connection;
 
@@ -109,6 +116,23 @@ int		add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_
 bool	host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len);
 bool	perform_scan(t_input *input, t_ipaddr *ipaddr, int scan);
 void	error_print(char *error_msg);
+
+// list methods
+t_list	*list_new(void *data, size_t data_size);
+void	list_add(t_list **list_item, t_list *new_item);
+void	list_free(t_list **list_tem);
+
+// nmap strucuts
+t_scan	*create_scan(int type);
+t_port	*create_port(int port_nb);
+t_nmap	*create_nmap_node(t_ipaddr *ipaddr);
+void	nmap_loop(t_input *nmap_input);
+
+// crafting the tcp header
+char *tcp_header(int tcp_byte);
+
+// threads
+void* thread_routine(void* arg);
 
 // list methods
 t_list	*list_new(void *data, size_t data_size);

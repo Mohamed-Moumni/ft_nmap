@@ -74,20 +74,6 @@ int main(int argc, char **argv)
 	// checks if the only required field is there
 	if (!ipaddr)
 		print_help();
-	printf("threads: %d\n", input.thread_count);
-
-	// while(input.ipaddr)
-	// {
-	// 	if (input.ipaddr->discovery)
-	// 	{
-	// 		if (perform_scan(&input, input.ipaddr, input.scan))
-	// 		{
-	// 			printf("error with the scan\n");
-	// 			return 0;
-	// 		}
-	// 		printf("ilop: %s is all good\n", input.ipaddr->ip_addr);
-	// 	}
-	// 	input.ipaddr = input.ipaddr->next;
-	// }
+	nmap_loop(&input);
 	return 0;
 }
