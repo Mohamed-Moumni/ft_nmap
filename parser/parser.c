@@ -79,34 +79,57 @@ bool    parse_ports(char    *param, t_input *input)
     int min = 0;
     int max = 0;
     int result;
+    int i = 0;
+    t_list *new_port;
+    char **commas_seperated = ft_split(param, ",");
+    char **splited;
 
-    if (strchr(param, '-'))
+    if (!commas_seperated)
+        return false;
+    while (commas_seperated[i])
     {
-        char **splited = ft_split(param, '-');
-        int  splited_len = ft_d_strlen(splited);
-        if (splited_len != 2 || !ft_isnum(splited[0]) || !ft_isnum(splited[1]))
+        if (strchr(commas_seperated[i], '-'))
         {
-            printf("ports: Invalid ports value\n");
-            return (false);
+            splited = ft_split(commas_seperated[i], '-');
+            int  splited_len = ft_d_strlen(splited);
+            if (splited_len != 2 || !ft_isnum(splited[0]) || !ft_isnum(splited[1]))
+            {
+                printf("ports: Invalid ports value\n");
+                return (false);
+            }
+            min = atoi(splited[0]);
+            max = atoi(splited[1]);
+            if (min > max || max - min > 1024)
+            {
+                printf("ports: Invalid range ports\n");
+                return (false);
+            }
+            while (min <= max)
+            {
+                new_port = list_new(min, sizeof(int));
+                list_add(input->ports, new_port);
+                min++;
+            }
         }
-        min = atoi(splited[0]);
-        max = atoi(splited[1]);
-        result = max - min + 1;
-    }
-    else {
-        if (!ft_isnum(param))
-        {
-            printf("ports: Invalid ports value\n");
-            return (false);
+        else {
+            if (!ft_isnum(commas_seperated[i]))
+            {
+                printf("ports: Invalid ports value\n");
+                return (false);
+            }
+            result = atoi(commas_seperated[i]);
+            if (result <= 0 || result > 1024)
+            {
+                printf("ports: Invalid ports value (min = 1, max = 1024)\n");
+                return (false);
+            }
+            new_port = list_new(result, sizeof(int));
+            list_add(input->ports, new_port);
         }
-        result = atoi(param);
+        i++;
     }
-    if (result <= 0 || result > 1024)
-    {
-        printf("ports: Invalid ports value (min = 1, max = 1024)\n");
-        return (false);
-    }
-    input->port_range = result;
-    input->port_start = min;
+    input->port_count = node_counter(input->ports);
+    if (input->port_count > 1024 || !input->port_count)
+        return false;
     return true;
 }   

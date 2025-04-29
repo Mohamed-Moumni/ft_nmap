@@ -25,8 +25,8 @@ int main(int argc, char **argv)
 	// init the input struct
 	input.scan = ALL_SCAN;
 	input.ipaddr = NULL;
-	input.port_range = 0;
-	input.port_start = 1;
+	input.ports = NULL;
+	input.port_count = 0;
 	input.thread_count = 0;
 	// handles ./ft_nmap & ./ft_nmap --help
 	if (argc == 1 || (argc == 2 && !strcmp("--help", argv[1])))
@@ -74,19 +74,20 @@ int main(int argc, char **argv)
 	// checks if the only required field is there
 	if (!ipaddr)
 		print_help();
-	printf("scan: %d / ports range: %d start from %d / threads: %d\n", input.scan, input.port_range, input.port_start, input.thread_count);
-	while(input.ipaddr)
-	{
-		if (input.ipaddr->discovery)
-		{
-			if (perform_scan(&input, input.ipaddr, input.scan))
-			{
-				printf("error with the scan\n");
-				return 0;
-			}
-			printf("ilop: %s is all good\n", input.ipaddr->ip_addr);
-		}
-		input.ipaddr = input.ipaddr->next;
-	}
+	printf("scan: %d / threads: %d\n", input.scan, input.thread_count);
+
+	// while(input.ipaddr)
+	// {
+	// 	if (input.ipaddr->discovery)
+	// 	{
+	// 		if (perform_scan(&input, input.ipaddr, input.scan))
+	// 		{
+	// 			printf("error with the scan\n");
+	// 			return 0;
+	// 		}
+	// 		printf("ilop: %s is all good\n", input.ipaddr->ip_addr);
+	// 	}
+	// 	input.ipaddr = input.ipaddr->next;
+	// }
 	return 0;
 }
