@@ -23,6 +23,11 @@ void nmap_loop(t_input *nmap_input)
 				thread = malloc(sizeof(pthread_t));
 				list_add(&threads, list_new(&thread, sizeof(pthread_t *)));
 				t_routine_arg routine_arg;
+
+				routine_arg.nmap = nmap_node;
+				routine_arg.port_range = nmap_input->port_count;
+				routine_arg.scans = nmap_input->scans;
+				routine_arg.ports = nmap_input->ports;
 				// create the thread
 				int error = pthread_create(thread, NULL, thread_routine, &routine_arg);
 				if (error != 0)

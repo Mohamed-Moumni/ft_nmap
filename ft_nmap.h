@@ -55,10 +55,11 @@ typedef struct s_input {
 }	t_input;
 
 typedef struct s_routine_arg {
-	int start_port;
-	int end_port;
-	int scan;
-}	t_routine_arg;
+	t_nmap	*nmap;
+	t_list	*ports;
+	t_list  *scans;
+	int		port_range;
+} t_routine_arg;
 
 typedef struct s_connect {
 	char			*argv;
