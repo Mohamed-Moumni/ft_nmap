@@ -54,13 +54,6 @@ typedef struct s_input {
 	t_ipaddr	*ipaddr;
 }	t_input;
 
-typedef struct s_routine_arg {
-	t_nmap	*nmap;
-	t_list	*ports;
-	t_list  *scans;
-	int		port_range;
-} t_routine_arg;
-
 typedef struct s_connect {
 	char			*argv;
 	char            *ip_addr;
@@ -97,6 +90,14 @@ typedef struct s_nmap
 	t_port				*open_ports;
 	t_port				*closed_ports;
 }	t_nmap;
+
+typedef struct s_routine_arg {
+	t_nmap	*nmap;
+	t_list	*ports;
+	t_list	*scans;
+	int		port_range;
+
+} t_routine_arg;
 
 extern t_connect connection;
 
@@ -146,6 +147,8 @@ t_port *create_port(int port_nb);
 t_nmap *create_nmap(t_ipaddr *ipaddr);
 
 // crafting the tcp header
-char *tcp_header(int tcp_byte);
+char	*tcp_header(int tcp_byte);
+void	join_threads(t_list *threads);
+t_list	*next_head_ports(t_list *ports, int offset);
 
 #endif

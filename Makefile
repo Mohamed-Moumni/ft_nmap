@@ -1,6 +1,6 @@
 SRC = ./main.c ./parser/parser.c ./parser/outils.c ./parser/ft_split.c \
 	  ./parser/ip_file_parse.c ./parser/gnl.c ./parser/ipaddr.c ./network_mapper/host_discovery.c \
-	  ./scanner/utils.c
+	  ./scanner/utils.c ./scanner/threads.c ./scanner/nmap_loop.c
 
 OBJ = $(SRC:.c=.o)
 
@@ -16,7 +16,7 @@ FLAGS =
 all: $(NAME)
 
 $(NAME): $(OBJ) $(HEADERS)
-	$(CC) $(FLAGS) $(OBJ) -o $(NAME) -lm
+	$(CC) $(FLAGS) $(OBJ) -o $(NAME) -lm -lpthread
 
 %.o : %.c $(HEADERS)
 	$(CC) $(FLAGS) -c $< -o $@

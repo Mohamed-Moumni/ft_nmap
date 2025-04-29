@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 		printf("scans: %d\n", *((int *)input.scans->data));
 		input.scans = input.scans->next;
 	}
-	// nmap_loop(&input);
+	nmap_loop(&input);
 	return 0;
 }
  

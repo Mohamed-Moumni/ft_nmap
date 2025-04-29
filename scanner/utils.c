@@ -64,8 +64,6 @@ void    list_free(t_list **list_item)
         list_temp = list_temp->next;
         free(list_item_to_free);
     }
-    if (list_item)
-        free(list_item);
 }
 
 t_scan  *create_scan(int type)
