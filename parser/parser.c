@@ -63,14 +63,21 @@ bool    parse_speedup(char  *param, t_input *input)
 bool    parse_scan(char *param, t_input *input)
 {
     char    *scans = "SYN/NULL/FIN/XMAS/ACK/UDP";
-    char    *ptr_pos = strstr(scans, param);
-    if (!ptr_pos)
+    char    **slash_seperated = ft_split(param, '/');
+    int     i = 0;
+
+    while (slash_seperated[i])
     {
-        printf("scan: Invalid scan value\n");
-        return (false);
+        char    *ptr_pos = strstr(scans, param);
+        if (!ptr_pos)
+        {
+            printf("scans: Invalid scan type\n");
+            return (false);
+        }
+        int     index_pos = (int)(ptr_pos - scans);
+        list_add(input->scans, list_new(index_pos, sizeof(int)));
+        i++;
     }
-    int     index_pos = (int)(ptr_pos - scans);
-    input->scan = index_pos;
     return true;
 }
 

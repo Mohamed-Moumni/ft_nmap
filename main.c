@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 	i = 1;
 	ipaddr = false;
 	// init the input struct
-	input.scan = ALL_SCAN;
+	input.scans = NULL;
 	input.ipaddr = NULL;
 	input.ports = NULL;
 	input.port_count = 0;
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 	// checks if the only required field is there
 	if (!ipaddr)
 		print_help();
-	printf("scan: %d / threads: %d\n", input.scan, input.thread_count);
+	printf("threads: %d\n", input.thread_count);
 
 	// while(input.ipaddr)
 	// {

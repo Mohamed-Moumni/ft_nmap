@@ -40,7 +40,7 @@ typedef struct s_ipaddr {
 }	t_ipaddr;
 
 typedef struct s_input {
-	int 		scan;
+	t_list		*scans;
 	t_list		*ports;
 	int			port_count;
 	int			thread_count;
