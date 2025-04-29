@@ -68,14 +68,15 @@ bool    parse_scan(char *param, t_input *input)
 
     while (slash_seperated[i])
     {
-        char    *ptr_pos = strstr(scans, param);
+        printf("hoho %s\n", slash_seperated[i]);
+        char    *ptr_pos = strstr(scans, slash_seperated[i]);
         if (!ptr_pos)
         {
             printf("scans: Invalid scan type\n");
             return (false);
         }
         int     index_pos = (int)(ptr_pos - scans);
-        list_add(input->scans, list_new(index_pos, sizeof(int)));
+        list_add(&input->scans, list_new(&index_pos, sizeof(int)));
         i++;
     }
     return true;
@@ -88,7 +89,7 @@ bool    parse_ports(char    *param, t_input *input)
     int result;
     int i = 0;
     t_list *new_port;
-    char **commas_seperated = ft_split(param, ",");
+    char **commas_seperated = ft_split(param, ',');
     char **splited;
 
     if (!commas_seperated)
@@ -113,12 +114,13 @@ bool    parse_ports(char    *param, t_input *input)
             }
             while (min <= max)
             {
-                new_port = list_new(min, sizeof(int));
-                list_add(input->ports, new_port);
+                new_port = list_new(&min, sizeof(int));
+                list_add(&input->ports, new_port);
                 min++;
             }
         }
-        else {
+        else
+        {
             if (!ft_isnum(commas_seperated[i]))
             {
                 printf("ports: Invalid ports value\n");
@@ -130,8 +132,8 @@ bool    parse_ports(char    *param, t_input *input)
                 printf("ports: Invalid ports value (min = 1, max = 1024)\n");
                 return (false);
             }
-            new_port = list_new(result, sizeof(int));
-            list_add(input->ports, new_port);
+            new_port = list_new(&result, sizeof(int));
+            list_add(&input->ports, new_port);
         }
         i++;
     }

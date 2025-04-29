@@ -1,4 +1,4 @@
-#include "ft_nmap.h"
+#include "../ft_nmap.h"
 
 void* thread_routine(void* arg)
 { 

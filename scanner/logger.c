@@ -1,4 +1,4 @@
-#include "ft_nmap.h"
+#include "../ft_nmap.h"
 
 typedef enum { LOG_INFO, LOG_WARN, LOG_ERROR } LogLevel;
 

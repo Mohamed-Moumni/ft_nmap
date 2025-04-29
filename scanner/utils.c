@@ -13,15 +13,26 @@ t_list  *list_new(void *data, size_t data_size)
         error_print("Memory allocation error: New List Item can't be allocated");
         exit(1);
     }
-    void *data = malloc(data_size);
-    if (!data)
+    new_item->data = malloc(data_size);
+    if (!new_item->data)
     {
         error_print("Memory allocation error: New Data Item can't be allocated");
         exit(1);
     }
-    new_item->data = data;
+    memcpy(new_item->data, data, data_size);
     new_item->next = NULL;
     return new_item;
+}
+
+int node_counter(t_list *data)
+{
+    int to_return = 0;
+    while (data)
+    {
+        to_return++;
+        data = data->next;
+    }
+    return to_return;
 }
 
 void    list_add(t_list **list, t_list *new_item)
@@ -37,7 +48,7 @@ void    list_add(t_list **list, t_list *new_item)
         {
             temp_item = temp_item->next;
         }
-        temp_item = new_item;
+        temp_item->next = new_item;
     }
 }
 

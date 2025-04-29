@@ -32,6 +32,12 @@
 #define OPEN 1
 #define CLOSED 0
 
+typedef struct s_list
+{
+	void	*data;
+	struct s_list *next;
+}	t_list;
+
 typedef struct s_ipaddr {
 	char			*ip_addr;
 	struct sockaddr *sock_addr;
@@ -52,7 +58,7 @@ typedef struct s_routine_arg {
 	int start_port;
 	int end_port;
 	int scan;
-} t_routine_arg;
+}	t_routine_arg;
 
 typedef struct s_connect {
 	char			*argv;
@@ -70,17 +76,11 @@ typedef struct icmp_header {
 	u_int16_t	sequence;
 }	t_icmp_header;
 
-typedef struct s_list
-{
-	void	*data;
-	struct s_list *next;
-} t_list;
-
 typedef struct s_scan
 {
 	int				type;
 	int				state;
-}t_scan;
+}	t_scan;
 
 typedef struct s_port
 {
@@ -88,14 +88,14 @@ typedef struct s_port
 	int				service;
 	int				category;
 	t_scan			*scans;
-}t_port;
+}	t_port;
 
 typedef struct s_nmap
 {
 	t_ipaddr			*ipaddr;
 	t_port				*open_ports;
 	t_port				*closed_ports;
-}t_nmap;
+}	t_nmap;
 
 extern t_connect connection;
 

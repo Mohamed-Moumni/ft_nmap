@@ -1,4 +1,4 @@
-#include "ft_nmap.h"
+#include "../ft_nmap.h"
 
 void nmap_loop(t_input *nmap_input)
 {
