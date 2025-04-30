@@ -2,6 +2,7 @@
 # define FTNMAP_H
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -117,38 +118,32 @@ char	*get_next_line(int fd);
 int		add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_t addrlen, bool disc);
 bool	host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len);
 bool	perform_scan(t_input *input, t_ipaddr *ipaddr, int scan);
-void	error_print(char *error_msg);
+void	print_error(const char *format, ...);
 
 // list methods
 t_list	*list_new(void *data, size_t data_size);
 void	list_add(t_list **list_item, t_list *new_item);
 void	list_free(t_list **list_tem);
+int		node_counter(t_list *list_to_count);
 
 // nmap strucuts
 t_scan	*create_scan(int type);
 t_port	*create_port(int port_nb);
 t_nmap	*create_nmap_node(t_ipaddr *ipaddr);
 void	nmap_loop(t_input *nmap_input);
+t_list	*next_head_ports(t_list *ports, int offset);
 
 // crafting the tcp header
 char *tcp_header(int tcp_byte);
 
 // threads
-void* thread_routine(void* arg);
-
-// list methods
-t_list	*list_new(void *data, size_t data_size);
-void	list_add(t_list **list_item, t_list *new_item);
-int		node_counter(t_list *list_to_count);
+void	*thread_routine(void* arg);
+void	join_threads(t_list *threads);
 
 // nmap strucuts
-t_scan *create_scan(int type);
-t_port *create_port(int port_nb);
-t_nmap *create_nmap(t_ipaddr *ipaddr);
-
-// crafting the tcp header
-char	*tcp_header(int tcp_byte);
-void	join_threads(t_list *threads);
-t_list	*next_head_ports(t_list *ports, int offset);
+t_scan	*create_scan(int type);
+t_port	*create_port(int port_nb);
+t_nmap	*create_nmap(t_ipaddr *ipaddr);
+void	scanner(void);
 
 #endif

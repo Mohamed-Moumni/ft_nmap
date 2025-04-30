@@ -76,17 +76,17 @@ int main(int argc, char **argv)
 	// checks if the only required field is there
 	if (!ipaddr)
 		print_help();
-	printf("threads: %d\n", input.thread_count);
-	while (input.ports)
-	{
-		printf("ports: %d\n", *((int *)input.ports->data));
-		input.ports = input.ports->next;
-	}
-	while (input.scans)
-	{
-		printf("scans: %d\n", *((int *)input.scans->data));
-		input.scans = input.scans->next;
-	}
+	// printf("threads: %d\n", input.thread_count);
+	// while (input.ports)
+	// {
+	// 	printf("ports: %d\n", *((int *)input.ports->data));
+	// 	input.ports = input.ports->next;
+	// }
+	// while (input.scans)
+	// {
+	// 	printf("scans: %d\n", *((int *)input.scans->data));
+	// 	input.scans = input.scans->next;
+	// }
 	nmap_loop(&input);
 	return 0;
 }

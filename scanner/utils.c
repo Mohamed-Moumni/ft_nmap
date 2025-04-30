@@ -1,8 +1,16 @@
 #include "../ft_nmap.h"
 
-void	error_print(char *error_msg)
+void print_error(const char *format, ...)
 {
-    printf("%s\n", error_msg);
+    va_list args;
+    fprintf(stderr, "ft_traceroute - error: ");
+
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+
+    fprintf(stderr, "\n");
+    exit(EXIT_FAILURE);
 }
 
 t_list  *list_new(void *data, size_t data_size)
@@ -10,13 +18,13 @@ t_list  *list_new(void *data, size_t data_size)
     t_list *new_item = malloc(sizeof(t_list));
     if (!new_item)
     {
-        error_print("Memory allocation error: New List Item can't be allocated");
+        print_error("Memory Allocation error: New List Item can't be allocated");
         exit(1);
     }
     new_item->data = malloc(data_size);
     if (!new_item->data)
     {
-        error_print("Memory allocation error: New Data Item can't be allocated");
+        print_error("Memory allocation error: New Data Item can't be allocated");
         exit(1);
     }
     memcpy(new_item->data, data, data_size);
@@ -71,7 +79,7 @@ t_scan  *create_scan(int type)
     t_scan *scan = malloc(sizeof(t_scan));
     if (!scan)
     {
-        error_print("Memory Allocation error: New Scan Item can't be allocated");
+        print_error("Memory Allocation error: Scan Item Can't Be allocated");
         exit(1);
     }
     scan->type = type;
@@ -83,7 +91,7 @@ t_port  *create_port(int port_nb)
     t_port *port = malloc(sizeof(t_port));
     if (!port)
     {
-        error_print("Memory Allocation error: New Port Item can't be allocated");
+        print_error("Memory Allocation error: Port Item Can't Be allocated");
         exit(1);
     }
     port->port_number = port_nb;
@@ -95,15 +103,9 @@ t_nmap  *create_nmap_node(t_ipaddr *ipaddr)
     t_nmap *nmap = malloc(sizeof(t_nmap));
     if (!nmap)
     {
-        error_print("Memory Allocation error: New Nmap Item can't be allocated");
+        print_error("Memory Allocation error: Nmpa Item Can't Be allocated");
         exit(1);
     }
     nmap->ipaddr = ipaddr;
     return nmap;
 }
-
-// char *tcp_header(int tcp_byte)
-// {
-    // struct tcphdr *tcp_header;
-// 
-// }

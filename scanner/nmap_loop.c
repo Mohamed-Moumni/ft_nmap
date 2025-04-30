@@ -1,5 +1,10 @@
 #include "../ft_nmap.h"
 
+void scanner(void)
+{
+	printf("Permform Scans \n");
+}
+
 void nmap_loop(t_input *nmap_input)
 {
     t_list	*nmap;
@@ -12,7 +17,7 @@ void nmap_loop(t_input *nmap_input)
 
 	nmap = NULL;
 	offset = 0;
-	step_count = nmap_input->port_count / nmap_input->thread_count;
+	step_count = nmap_input->port_count / nmap_input->thread_count + 1;
     while(nmap_input->ipaddr)
 	{
 		if (nmap_input->ipaddr->discovery)
@@ -39,7 +44,7 @@ void nmap_loop(t_input *nmap_input)
 				int error = pthread_create(thread, NULL, thread_routine, &routine_arg);
 				if (error != 0)
 				{
-					printf("Error %s\n", strerror(error));
+					print_error("Pthread Create: %s\n", strerror(error));
 					exit(1);
 				}	
 				pthread_join(*thread, NULL);
