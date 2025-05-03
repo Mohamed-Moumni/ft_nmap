@@ -32,6 +32,7 @@
 #define UDP_SCAN  22
 #define OPEN 1
 #define CLOSED 0
+#define	OPEN_FILTERED 11
 
 typedef struct s_list
 {
