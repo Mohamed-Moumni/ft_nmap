@@ -1,6 +1,8 @@
 #ifndef FTNMAP_H
 # define FTNMAP_H
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
@@ -12,9 +14,9 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#include <netinet/ip_icmp.h>
-#include <netinet/ip.h>
 #include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
 #include <netinet/tcp.h>
 #include <time.h>
 #include <fcntl.h>
@@ -100,6 +102,12 @@ typedef struct s_routine_arg {
 
 } t_routine_arg;
 
+typedef struct s_probe
+{
+	struct iphdr	ip_header;
+	struct tcphdr	tcp_header;
+} t_probe;
+
 extern t_connect connection;
 
 bool    parse_ip(char   *param, t_input *input);
@@ -119,6 +127,7 @@ int		add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_
 bool	host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len);
 bool	perform_scan(t_input *input, t_ipaddr *ipaddr, int scan);
 void	print_error(const char *format, ...);
+unsigned short	checksum(void *b, int len);
 
 // list methods
 t_list	*list_new(void *data, size_t data_size);
