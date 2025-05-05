@@ -4,63 +4,61 @@
 
 // Get IP Header
 
-t_scan  *syn_scan(int port_number, int socket, struct sockaddr_in *sockaddr, socklen_t socklen)
+unsigned short checksum(void *b, int len)
 {
-    // in this method i have to perform the SYN scan on this port number
-    // for this ip address.
-    // waiting for a response from the target.
+	unsigned short *buf = b;
+	unsigned int sum = 0;
+	unsigned short result;
 
-    char    data[1024];
-    t_probe *probe;
+	while (len > 1) {
+		sum += *buf++;
+		len -=2;
+	}
 
-    memset(data, 1024, 0);
-    srand(time(NULL));
+	if (len ==1) {
+		sum += *(unsigned char *)buf;
+	}
 
-    probe = (t_probe *)data;
-    probe->ip_header.version = htonl(4);
-    probe->ip_header.ihl = htons(5);
-    probe->ip_header.tos = htons(0);
-    probe->ip_header.tot_len = htons(sizeof(struct iphdr) + sizeof(struct tcphdr));
-    probe->ip_header.frag_off = htons(0);
-    probe->ip_header.id = htons(rand() % 65536);
-    probe->ip_header.ttl = htons(128);
-    probe->ip_header.protocol = IPPROTO_TCP;
-    probe->ip_header.check = htons(0);
-    probe->ip_header.saddr = 0;
-    probe->ip_header.daddr = 0;
-
-    probe->ip_header.check = checksum((void *)(&probe->ip_header), sizeof(struct iphdr));
-
-    // TCP Header
-
-    // probe->tcp_header.
-
-    probe->tcp_header.th_sport = htons(54321);
-    probe->tcp_header.th_dport = htons(port_number);
-    probe->tcp_header.seq = htons(rand() % 65536);
-    probe->tcp_header.ack = htons(0);
-    probe->tcp_header.th_flags = TH_SYN;
-    probe->tcp_header.doff = htons(5);
-    probe->tcp_header.check = htons(0);
-    probe->tcp_header.urg_ptr = htons(0);
-    probe->tcp_header.window = htons(5840);
-    probe->tcp_header.check = checksum((void *)(&probe->tcp_header), sizeof(struct tcphdr));
-
-    int send = sendto(socket, data, sizeof(t_probe), 0, sockaddr, socklen);
-    if (send < 0)
-    {
-        printf("Send To Error: \n", strerror(send));
-        exit(1);
-    }
+	sum = (sum >> 16) + (sum & 0xFFFF);
+	sum += (sum >> 16);
+	result = ~sum;
+	return result;
 }
 
+void generate_ip_header(t_probe *probe_request, struct in_addr ip_source, struct in_addr ip_destination)
+{
+    probe_request->ip_header.ip_v = 4;
+    probe_request->ip_header.ip_hl = 5;
+    probe_request->ip_header.ip_tos = 0;
+    probe_request->ip_header.ip_len = htons(sizeof(struct ip) + sizeof(struct tcphdr));
+    probe_request->ip_header.ip_id = 7793; // just static value for the moment
+    probe_request->ip_header.ip_off = htons(0);
+    probe_request->ip_header.ip_ttl = 128;
+    probe_request->ip_header.ip_p = IPPROTO_TCP;
+    probe_request->ip_header.ip_sum = htons(0);
+    probe_request->ip_header.ip_src = ip_source;
+    probe_request->ip_header.ip_dst = ip_destination;
+    probe_request->ip_header.ip_sum = checksum((void *)(&probe_request->ip_header), sizeof(struct ip));
+}
+
+void generate_tcp_header(int port, t_probe *probe_request)
+{
+    probe_request->tcp_header.th_sport = htons(54321);
+    probe_request->tcp_header.th_dport = htons(port);
+    probe_request->tcp_header.th_seq = htons(223423);
+    probe_request->tcp_header.th_ack = htons(0);
+    probe_request->tcp_header.th_flags = TH_SYN;
+    probe_request->tcp_header.th_sum = htons(0);
+    probe_request->tcp_header.th_urp = htons(0);
+    probe_request->tcp_header.th_win = htons(5840);
+    probe_request->tcp_header.th_sum = checksum((void *)(&probe_request->tcp_header), sizeof(struct tcphdr));
+}
 
 struct sockaddr_in get_local_address(void)
 {
     int                 sock;
     struct sockaddr_in  local_addr;
     socklen_t addr_len = sizeof(local_addr);
-    char src_ip[INET_ADDRSTRLEN];
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
@@ -72,9 +70,10 @@ struct sockaddr_in get_local_address(void)
     return local_addr;
 }
 
-struct sockaddr_in get_target_address(void)
+t_sock get_target_address(void)
 {
     int     sock;
+    t_sock tsock;
     struct sockaddr_in  dest_addr;
     socklen_t addr_len = sizeof(dest_addr);
 
@@ -82,24 +81,53 @@ struct sockaddr_in get_target_address(void)
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(53);
     inet_pton(AF_INET, "8.8.8.8", &dest_addr.sin_addr);
-    return dest_addr;
+    tsock.socket = dest_addr;
+    tsock.socket_len = addr_len;
+    return tsock;
 }
 
 int main(void)
 {
-    // int tcp_socket = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-
-    // if (tcp_socket == -1)
-    // {
-        // printf("Socket Creation Error\n");
-        // exit(1);
-    // }
+    int tcp_socket = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
     
-    // struct tcphdr tcp_header;
+    if (tcp_socket == -1)
+    {
+        printf("Socket Creation Error\n");
+        exit(1);
+    }
+    t_probe *probe;
+    char    data[1024];
+    char    data_to_send[1024];
+    struct sockaddr_in source_address;
+    t_sock tsock;
+    char *error;
 
-    // tcp_header.th_flags = TH_SYN;
+    memset(data_to_send, 0, 1024);
+    probe = malloc(sizeof(t_probe));
+    source_address = get_local_address();
+    tsock = get_target_address();
+    int value = 1;
+    // memset(data, 0, 1024);
 
-    // tcp_header.
+    setsockopt(tcp_socket, IPPROTO_IP, IP_HDRINCL, &value, sizeof(value));
 
-    get_local_address();
+    generate_ip_header(probe, source_address.sin_addr, tsock.socket.sin_addr);
+    generate_tcp_header(80, probe);
+    // memcpy((void *)data_to_send, (void *)probe->ip_header, sizeof(struct ip));
+    printf("%lu\n", sizeof(t_probe));
+    int send_res = sendto(tcp_socket, (void *)probe, sizeof(t_probe), 0,(struct sockaddr *)&tsock.socket, tsock.socket_len);
+    if (send_res < 0)
+    {
+        perror(error);
+        print_error("sendto error: %s", strerror(send_res));
+        exit(1);
+    }
+
+    // int recv_res = recvfrom(tcp_socket, data, 1024, 0, (struct sockaddr *)&tsock.socket, &tsock.socket_len);
+    // if (recv_res < 0)
+    // {
+    //     print_error("recvfrom error:");
+    //     exit(1);
+    // }
+    // printf("Hello");
 }

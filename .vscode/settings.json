@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "tcp.h": "c"
+        "tcp.h": "c",
+        "ft_nmap.h": "c"
     }
 }

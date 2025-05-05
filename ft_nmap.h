@@ -104,9 +104,14 @@ typedef struct s_routine_arg {
 
 typedef struct s_probe
 {
-	struct iphdr	ip_header;
+	struct ip		ip_header;
 	struct tcphdr	tcp_header;
 } t_probe;
+
+typedef struct sock{
+	struct sockaddr_in socket;
+	socklen_t socket_len;
+} t_sock;
 
 extern t_connect connection;
 

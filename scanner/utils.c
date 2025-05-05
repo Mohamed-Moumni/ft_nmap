@@ -3,7 +3,7 @@
 void print_error(const char *format, ...)
 {
     va_list args;
-    fprintf(stderr, "ft_traceroute - error: ");
+    fprintf(stderr, "ft_nmap - error: ");
 
     va_start(args, format);
     vfprintf(stderr, format, args);
