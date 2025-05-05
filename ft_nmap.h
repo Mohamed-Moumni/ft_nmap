@@ -34,6 +34,7 @@
 #define UDP_SCAN  22
 #define OPEN 1
 #define CLOSED 0
+#define TTL 128
 
 typedef struct s_list
 {
@@ -101,6 +102,14 @@ typedef struct s_routine_arg {
 	int		port_range;
 
 } t_routine_arg;
+
+typedef struct s_pseudo_header {
+    uint32_t source_address;
+    uint32_t dest_address;
+    uint8_t placeholder;
+    uint8_t protocol;
+    uint16_t tcp_length;
+}t_pseudo_header;
 
 typedef struct s_probe
 {
