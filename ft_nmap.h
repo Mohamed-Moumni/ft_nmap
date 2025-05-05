@@ -148,4 +148,7 @@ t_port	*create_port(int port_nb);
 t_nmap	*create_nmap(t_ipaddr *ipaddr);
 void	scanner(void);
 
+// scans
+int udp_scan(char *ip, int port);
+
 #endif
