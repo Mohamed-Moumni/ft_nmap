@@ -33,6 +33,7 @@
 #define OPEN 1
 #define CLOSED 0
 #define	OPEN_FILTERED 11
+#define FILTERED 12
 
 typedef struct s_list
 {
