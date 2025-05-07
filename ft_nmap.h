@@ -24,6 +24,7 @@
 #include <sys/time.h>
 #include <math.h>
 #include <pthread.h>
+#include <pcap.h>
 
 #define	ALL_SCAN  -1
 #define	SYN_SCAN  0
