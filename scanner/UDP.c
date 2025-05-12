@@ -63,6 +63,11 @@ int udp_scan(char *ip, int port)
 	}
 	FD_SET(udp_sockfd, &readfds);
 	icmp_sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	if (icmp_sockfd < 0)
+	{
+		printf("socket error %d\n", icmp_sockfd);
+		exit(1);
+	}
 	FD_SET(icmp_sockfd, &readfds);
 	maxfd = udp_sockfd > icmp_sockfd ? udp_sockfd : icmp_sockfd;
 
