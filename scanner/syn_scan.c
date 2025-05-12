@@ -231,7 +231,8 @@ void prob_packet(const char *ip_addr, const int port, const int send_socket)
         print_error("sendto error: %s", strerror(send_res));
 }
 
-char *build_filter(const char *ip, int port) {
+char *build_filter(const char *ip, int port)
+{
     size_t buf_size = 10 + strlen(ip) + 15 + 6; 
     char *filter = malloc(buf_size);
     if (!filter) {
@@ -242,33 +243,32 @@ char *build_filter(const char *ip, int port) {
     return filter;
 }
 
-int main(void)
+int tcp_scan(const char *ip_addr, int scan_type, int port, int socket)
 {
-    int tcp_socket = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
-    int value;
     char *filter;
 
-    value = 1;
-    
-    if (tcp_socket == -1)
-        print_error("Socket Creation Error\n");
-    setsockopt(tcp_socket, IPPROTO_IP, IP_HDRINCL, &value, sizeof(value));
-    prob_packet("8.8.8.8", 116, tcp_socket);
-    filter = build_filter("8.8.8.8", 116);
+    prob_packet(ip_addr, port, socket);
+    filter = build_filter(ip_addr, port);
     const u_char * packet = packet_receive(filter);
-    int response = handle_packet(packet, SYN_SCAN);
-    printf("RES: %d\n", response);
-
-    switch (response)
-    {
-    case OPEN:
-        printf("Port Open\n");
-        break;
-    case CLOSED:
-        printf("Port Closed\n");
-        break;
-    default:
-        printf("Port Closed 2\n");
-        break;
-    }
+    int response = handle_packet(packet, scan_type);
+    return response;
 }
+
+// int main(void)
+// {
+   
+//     printf("RES: %d\n", response);
+
+//     switch (response)
+//     {
+//     case OPEN:
+//         printf("Port Open\n");
+//         break;
+//     case CLOSED:
+//         printf("Port Closed\n");
+//         break;
+//     default:
+//         printf("Port Closed 2\n");
+//         break;
+//     }
+// }

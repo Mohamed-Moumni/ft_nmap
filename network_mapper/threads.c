@@ -3,6 +3,14 @@
 void* thread_routine(void* arg)
 {     
     t_routine_arg   *routine_arg;
+    int             send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
+    int             value;
+    char            *filter;
+
+    value = 1;    
+    if (send_socket == -1)
+        print_error("Socket Creation Error\n");
+    setsockopt(send_socket, IPPROTO_IP, IP_HDRINCL, &value, sizeof(value));
 
     routine_arg = (t_routine_arg *)arg;
     printf("Thread Routine Method!!\n");
@@ -11,33 +19,30 @@ void* thread_routine(void* arg)
     // for each port do the available scan that should performed
     while (routine_arg->ports && routine_arg->port_range > 0)
     {
-        printf("Port Number: %d\n", *((int *)routine_arg->ports->data));
-        scanner();
+        int port = *((int *)routine_arg->ports->data);
+        while (routine_arg->scans)
+        {
+            int scan = *((int *)routine_arg->scans->data);
+            switch (scan)
+            {
+            case UDP_SCAN:
+                int res = udp_scan(routine_arg->nmap->ipaddr->ip_addr, port);
+                printf("Result --- %d\n", res);
+                break;
+            case SYN_SCAN:
+                int res2 = tcp_scan(routine_arg->nmap->ipaddr->ip_addr, scan, port, send_socket);
+                printf("Result -- %d\n", res2);
+                break;
+            default:
+                break;
+            }
+            routine_arg->scans = routine_arg->scans->next;
+        }
         routine_arg->ports = routine_arg->ports->next;
         routine_arg->port_range--;
     }
     return "hello";
 }
-
-// void join_threads(t_list *threads)
-// {
-//     t_list *thread_temp;
-
-//     thread_temp = threads;
-//     while(thread_temp)
-//     {
-//         pthread_t thread;
-
-//         thread = *((pthread_t *)thread_temp->data);
-//         int res = pthread_join(thread, NULL);
-//         if (res)
-//         {
-//             error_print("Join Threads: %s \n", strerror(res));
-//             exit(1);
-//         }
-//         thread_temp = thread_temp->next;
-//     }
-// }
 
 t_list	*next_head_ports(t_list *ports, int offset)
 {

@@ -104,7 +104,6 @@ typedef struct s_routine_arg {
 	t_list	*ports;
 	t_list	*scans;
 	int		port_range;
-
 } t_routine_arg;
 
 typedef struct s_pseudo_header {
@@ -174,6 +173,17 @@ t_nmap	*create_nmap(t_ipaddr *ipaddr);
 void	scanner(void);
 
 // scans
-int udp_scan(char *ip, int port);
+int					udp_scan(char *ip, int port);
+void				generate_ip_header(t_probe *probe_request, struct in_addr ip_source, struct in_addr ip_destination);
+void				generate_tcp_header(int port, int scan_type, t_probe *probe_request, struct in_addr ip_source, struct in_addr ip_destination);
+struct sockaddr_in	get_local_address(void);
+t_sock 				get_target_address(const char *target_addr, int port);
+bool				check_time_out(struct timeval *start_time);
+int					syn_handler(const u_char *packet);
+const u_char		*packet_receive(char *filter_exp);
+int handle_packet(const u_char *packet, int scan);
+void prob_packet(const char *ip_addr, const int port, const int send_socket);
+char *build_filter(const char *ip, int port);
+int tcp_scan(const char *ip_addr, int scan_type, int port, int socket);
 
 #endif

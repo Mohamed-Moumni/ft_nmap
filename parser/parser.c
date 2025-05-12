@@ -68,7 +68,7 @@ bool    parse_scan(char *param, t_input *input)
 
     while (slash_seperated[i])
     {
-        printf("hoho %s\n", slash_seperated[i]);
+        // printf("hoho %s\n", slash_seperated[i]);
         char    *ptr_pos = strstr(scans, slash_seperated[i]);
         if (!ptr_pos)
         {

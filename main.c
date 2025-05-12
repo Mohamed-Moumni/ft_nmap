@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 	// loop through the args
 	while (argc > i)
 	{
-		printf("hoho %s\n", argv[i]);
+		// printf("hoho %s\n", argv[i]);
 		if (!strcmp(argv[i], "--ip")) // this one handles "--ip"
 		{
 			// this one handle the duplication usage of --file and --ip
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 		// we skip the option's value and get to the next key
 		i += 2;
 	}
-	printf("hoho\n");
+	// printf("hoho\n");
 	// checks if the only required field is there
 	if (!ipaddr)
 		print_help();
