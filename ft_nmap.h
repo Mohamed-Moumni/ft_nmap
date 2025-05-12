@@ -2,6 +2,7 @@
 # define FTNMAP_H
 
 #define _GNU_SOURCE
+#define _BEGIN_DECLS
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -33,8 +34,9 @@
 #define	FIN_SCAN  9
 #define	XMAS_SCAN 13
 #define UDP_SCAN  22
-#define OPEN 1
 #define CLOSED 0
+#define OPEN 1
+#define FILTERED 2
 #define TTL 128
 
 typedef struct s_list
