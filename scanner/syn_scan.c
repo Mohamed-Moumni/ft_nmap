@@ -100,7 +100,7 @@ struct sockaddr_in get_local_address(void)
     return local_addr;
 }
 
-t_sock get_target_address(char *target_addr, int port)
+t_sock get_target_address(const char *target_addr, int port)
 {
     int     sock;
     t_sock  tsock;
@@ -127,53 +127,81 @@ bool check_time_out(struct timeval *start_time)
     return false;
 }
 
-int recieve_packet(char *filter_exp)
+int syn_handler(const u_char *packet)
+{
+    if (packet)
+    {
+        const char  *ip_header = packet + 14;
+        struct ip   *iph = (struct ip *)ip_header;
+        int         ip_header_len = iph->ip_hl * 4;
+    
+        // ACK or RST Response
+        if (iph->ip_p == IPPROTO_TCP)
+        {
+            const char      *tcp_header = ip_header + ip_header_len;
+            struct tcphdr   *tcph = (struct tcphdr *)tcp_header;
+            if (tcph->ack == 1)
+                return OPEN;
+            return CLOSED;
+        }
+        // ICMP Errors Response
+        else if (iph->ip_p == IPPROTO_ICMP)
+        {
+            const char *icmp_header = ip_header + ip_header_len;
+            struct icmphdr *icmphdr = (struct icmphdr *)icmp_header;
+            if (icmphdr->type == ICMP_UNREACH)
+            {
+                if (icmphdr->code == 1 || icmphdr->code == 2 || icmphdr->code == 3 || icmphdr->code == 9 || icmphdr->code == 10 || icmphdr->code ==  13)
+                {
+                    return FILTERED;
+                }
+            }
+        }
+        // No Response
+    }
+    return FILTERED;
+}
+
+const u_char    *packet_receive(char *filter_exp)
 {
     char                errbuf[PCAP_ERRBUF_SIZE];
     pcap_if_t           *alldevs;
     pcap_if_t           *dev;
     struct pcap_pkthdr  *header;
-	const u_char        *packet;
+	const u_char        *packet = NULL;
     pcap_t              *handle;
     struct bpf_program  fp;
     bpf_u_int32         net = 0;
     bpf_u_int32         mask = 0;
     
     if (pcap_findalldevs(&alldevs, errbuf) == -1) {
-        fprintf(stderr, "Error finding devices: %s\n", errbuf);
-        return -1;
+        print_error("Error finding devices: %s\n", errbuf);
     }
     
     if (alldevs == NULL) {
-        fprintf(stderr, "No devices found\n");
-        return -1;
+        print_error("No devices found\n");
     }
     
     dev = alldevs;
     if (dev->name == NULL) {
-        fprintf(stderr, "First device has no name\n");
-        return -1;
+        print_error("First device has no name\n");
     }
 
     handle = pcap_open_live(dev->name, 65535, 1, 100, errbuf);
 
     if (pcap_setnonblock(handle, 1, errbuf) == -1) {
-        fprintf(stderr, "Error setting non-blocking mode: %s\n", errbuf);
-        return -1;
+        print_error("Error setting non-blocking mode: %s\n", errbuf);
     }
 
     pcap_freealldevs(alldevs);
     if (handle == NULL) {
-        fprintf(stderr, "Couldn't open device %s: %s\n", dev->name, errbuf);
-        return -1;
+        print_error("Couldn't open device %s: %s\n", dev->name, errbuf);
     }
     if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {
-		fprintf(stderr, "Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
-		return -1;
+        print_error("Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
 	}
 	if (pcap_setfilter(handle, &fp) == -1) {
-		fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
-		return -1;
+        print_error("Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
 	}
 
     struct timeval start_time;
@@ -182,52 +210,26 @@ int recieve_packet(char *filter_exp)
     {
         int result = pcap_next_ex(handle, &header, &packet);
         if (result == 1)
-        {
-            const char  *ip_header = packet + 14;
-            struct ip   *iph = (struct ip *)ip_header;
-            int ip_header_len = iph->ip_hl * 4;
-
-            // ACK or RST Response
-            if (iph->ip_p == IPPROTO_TCP)
-            {
-                const char      *tcp_header = ip_header + ip_header_len;
-                struct tcphdr   *tcph = (struct tcphdr *)tcp_header;
-                if (tcph->ack == 1)
-                    return OPEN;
-                return CLOSED;
-            }
-            // ICMP Errors Response
-            else if (iph->ip_p == IPPROTO_ICMP)
-            {
-                const char *icmp_header = ip_header + ip_header_len;
-                struct icmphdr *icmphdr = (struct icmphdr *)icmp_header;
-                if (icmphdr->type == ICMP_UNREACH)
-                {
-                    if (icmphdr->code == 1 || icmphdr->code == 2 || icmphdr->code == 3 || icmphdr->code == 9 || icmphdr->code == 10 || icmphdr->code ==  13)
-                    {
-                        return FILTERED;
-                    }
-                }
-            }
-            // No Response
-            return FILTERED;
-            // printf("soure Port: %d\n", ntohs(tcph->th_sport));
-            // printf("Destination Port: %d\n", ntohs(tcph->th_dport));
-        }
+            return packet;
         usleep(1000);
     }
     pcap_close(handle);
+    return NULL;
 }
 
-int main(void)
+int handle_packet(const u_char *packet, int scan)
 {
-    int tcp_socket = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
-    
-    if (tcp_socket == -1)
+    switch (scan)
     {
-        printf("Socket Creation Error\n");
-        exit(1);
+    case SYN_SCAN:
+        return syn_handler(packet);
+    default:
+        return -1;
     }
+}
+
+void prob_packet(const char *ip_addr, const int port, const int send_socket)
+{
     t_probe             *probe;
     char                data[1024];
     struct sockaddr_in  source_address;
@@ -236,25 +238,46 @@ int main(void)
     memset(data, 0, 1024);
     probe = malloc(sizeof(t_probe));
     source_address = get_local_address();
-    tsock = get_target_address("8.8.8.8", 116);
-    int value = 1;
+    tsock = get_target_address(ip_addr, port);
 
-    setsockopt(tcp_socket, IPPROTO_IP, IP_HDRINCL, &value, sizeof(value));
 
     generate_ip_header(probe, source_address.sin_addr, tsock.socket.sin_addr);
-    generate_tcp_header(116, TH_SYN, probe, source_address.sin_addr, tsock.socket.sin_addr);
+    generate_tcp_header(port, TH_SYN, probe, source_address.sin_addr, tsock.socket.sin_addr);
 
     memcpy(data, &probe->ip_header, sizeof(struct ip));
     memcpy(data + sizeof(struct ip), &probe->tcp_header, sizeof(struct tcphdr));
 
-    int send_res = sendto(tcp_socket, (void *)data, sizeof(struct ip) + sizeof(struct tcphdr), 0,(struct sockaddr *)&tsock.socket, tsock.socket_len);
+    int send_res = sendto(send_socket, (void *)data, sizeof(struct ip) + sizeof(struct tcphdr), 0,(struct sockaddr *)&tsock.socket, tsock.socket_len);
     if (send_res < 0)
-    {
         print_error("sendto error: %s", strerror(send_res));
-        exit(1);
+}
+
+char *build_filter(const char *ip, int port) {
+    size_t buf_size = 10 + strlen(ip) + 15 + 6; 
+    char *filter = malloc(buf_size);
+    if (!filter) {
+        print_error("Malloc Failed\n");
     }
-    // char filter_exp[] = "src host 18.154.84.103 and src port 443";
-    int response = recieve_packet("src host 8.8.8.8 and src port 116");
+
+    snprintf(filter, buf_size, "src host %s and src port %d", ip, port);
+    return filter;
+}
+
+int main(void)
+{
+    int tcp_socket = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
+    int value;
+    char *filter;
+
+    value = 1;
+    
+    if (tcp_socket == -1)
+        print_error("Socket Creation Error\n");
+    setsockopt(tcp_socket, IPPROTO_IP, IP_HDRINCL, &value, sizeof(value));
+    prob_packet("8.8.8.8", 116, tcp_socket);
+    filter = build_filter("8.8.8.8", 116);
+    const u_char * packet = packet_receive(filter);
+    int response = handle_packet(packet, SYN_SCAN);
     printf("RES: %d\n", response);
 
     switch (response)
