@@ -25,16 +25,14 @@ void* thread_routine(void* arg)
             int scan = *((int *)routine_arg->scans->data);
             switch (scan)
             {
-            case UDP_SCAN:
-                int res = udp_scan(routine_arg->nmap->ipaddr->ip_addr, port);
-                printf("Result --- %d\n", res);
-                break;
-            case SYN_SCAN:
-                int res2 = tcp_scan(routine_arg->nmap->ipaddr->ip_addr, scan, port, send_socket);
-                printf("Result -- %d\n", res2);
-                break;
-            default:
-                break;
+                case UDP_SCAN:
+                    int res = udp_scan(routine_arg->nmap->ipaddr->ip_addr, port);
+                    printf("Result --- %d\n", res);
+                    break;
+                default:
+                    int res2 = tcp_scan(routine_arg->nmap->ipaddr->ip_addr, scan, port, send_socket);
+                    printf("Result -- %d\n", res2);
+                    break;
             }
             routine_arg->scans = routine_arg->scans->next;
         }

@@ -169,6 +169,10 @@ int handle_packet(const u_char *packet, int scan)
             return syn_handler(packet);
         case ACK_SCAN:
             return ack_handler(packet);
+        case NULL_SCAN:
+            return FNX_handler(packet);
+        case XMAS_SCAN:
+            return FNX_handler(packet);
         case FIN_SCAN:
             return FNX_handler(packet);
         default:
