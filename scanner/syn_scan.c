@@ -216,11 +216,11 @@ char *build_filter(const char *ip, int port)
     return filter;
 }
 
-int tcp_scan(const char *ip_addr, int scan_type, int port, int socket)
+int tcp_scan(const char *ip_addr, int flag, int port, int socket, int scan_type)
 {
     char *filter;
 
-    prob_packet(ip_addr, port, socket, scan_type);
+    prob_packet(ip_addr, port, socket, flag);
     filter = build_filter(ip_addr, port);
     const u_char * packet = packet_receive(filter);
     int response = handle_packet(packet, scan_type);

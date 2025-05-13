@@ -185,7 +185,7 @@ const u_char		*packet_receive(char *filter_exp);
 int					handle_packet(const u_char *packet, int scan);
 void				prob_packet(const char *ip_addr, const int port, const int send_socket, int scan_type);
 char				*build_filter(const char *ip, int port);
-int					tcp_scan(const char *ip_addr, int scan_type, int port, int socket);
+int					tcp_scan(const char *ip_addr, int scan_type, int port, int socketk, int);
 int					ack_handler(const u_char *packet);
 int					syn_handler(const u_char *packet);
 int					FNX_handler(const u_char *packet);
