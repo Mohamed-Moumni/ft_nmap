@@ -106,41 +106,6 @@ bool check_time_out(struct timeval *start_time)
     return false;
 }
 
-int syn_handler(const u_char *packet)
-{
-    if (packet)
-    {
-        const char  *ip_header = packet + 14;
-        struct ip   *iph = (struct ip *)ip_header;
-        int         ip_header_len = iph->ip_hl * 4;
-    
-        // ACK or RST Response
-        if (iph->ip_p == IPPROTO_TCP)
-        {
-            const char      *tcp_header = ip_header + ip_header_len;
-            struct tcphdr   *tcph = (struct tcphdr *)tcp_header;
-            if (tcph->ack == 1)
-                return OPEN;
-            return CLOSED;
-        }
-        // ICMP Errors Response
-        else if (iph->ip_p == IPPROTO_ICMP)
-        {
-            const char *icmp_header = ip_header + ip_header_len;
-            struct icmphdr *icmphdr = (struct icmphdr *)icmp_header;
-            if (icmphdr->type == ICMP_UNREACH)
-            {
-                if (icmphdr->code == 1 || icmphdr->code == 2 || icmphdr->code == 3 || icmphdr->code == 9 || icmphdr->code == 10 || icmphdr->code ==  13)
-                {
-                    return FILTERED;
-                }
-            }
-        }
-        // No Response
-    }
-    return FILTERED;
-}
-
 const u_char    *packet_receive(char *filter_exp)
 {
     char                errbuf[PCAP_ERRBUF_SIZE];
@@ -200,14 +165,18 @@ int handle_packet(const u_char *packet, int scan)
 {
     switch (scan)
     {
-    case SYN_SCAN:
-        return syn_handler(packet);
-    default:
-        return -1;
+        case SYN_SCAN:
+            return syn_handler(packet);
+        case ACK_SCAN:
+            return ack_handler(packet);
+        case FIN_SCAN:
+            return FNX_handler(packet);
+        default:
+            return -1;
     }
 }
 
-void prob_packet(const char *ip_addr, const int port, const int send_socket)
+void prob_packet(const char *ip_addr, const int port, const int send_socket, int scan_type)
 {
     t_probe             *probe;
     char                data[1024];
@@ -221,7 +190,7 @@ void prob_packet(const char *ip_addr, const int port, const int send_socket)
 
 
     generate_ip_header(probe, source_address.sin_addr, tsock.socket.sin_addr);
-    generate_tcp_header(port, TH_SYN, probe, source_address.sin_addr, tsock.socket.sin_addr);
+    generate_tcp_header(port, scan_type, probe, source_address.sin_addr, tsock.socket.sin_addr);
 
     memcpy(data, &probe->ip_header, sizeof(struct ip));
     memcpy(data + sizeof(struct ip), &probe->tcp_header, sizeof(struct tcphdr));
@@ -247,7 +216,7 @@ int tcp_scan(const char *ip_addr, int scan_type, int port, int socket)
 {
     char *filter;
 
-    prob_packet(ip_addr, port, socket);
+    prob_packet(ip_addr, port, socket, scan_type);
     filter = build_filter(ip_addr, port);
     const u_char * packet = packet_receive(filter);
     int response = handle_packet(packet, scan_type);

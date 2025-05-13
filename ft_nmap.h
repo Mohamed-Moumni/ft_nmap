@@ -39,6 +39,7 @@
 #define OPEN 1
 #define FILTERED 2
 #define TTL 128
+#define UNFILTERED 3
 
 typedef struct s_list
 {
@@ -181,9 +182,13 @@ t_sock 				get_target_address(const char *target_addr, int port);
 bool				check_time_out(struct timeval *start_time);
 int					syn_handler(const u_char *packet);
 const u_char		*packet_receive(char *filter_exp);
-int handle_packet(const u_char *packet, int scan);
-void prob_packet(const char *ip_addr, const int port, const int send_socket);
-char *build_filter(const char *ip, int port);
-int tcp_scan(const char *ip_addr, int scan_type, int port, int socket);
+int					handle_packet(const u_char *packet, int scan);
+void				prob_packet(const char *ip_addr, const int port, const int send_socket, int scan_type);
+char				*build_filter(const char *ip, int port);
+int					tcp_scan(const char *ip_addr, int scan_type, int port, int socket);
+int					ack_handler(const u_char *packet);
+int					syn_handler(const u_char *packet);
+int					FNX_handler(const u_char *packet);
+
 
 #endif
