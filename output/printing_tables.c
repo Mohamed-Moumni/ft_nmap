@@ -101,6 +101,21 @@ void    print_table(char *title, t_port *data, int scan_counter)
     }
 }
 
+void print_stats(char *ip, int port_count, t_scan *scans, int thread_count)
+{
+    printf("Scan Configurations\n");
+    printf("Target Ip-Address: %s\n", ip);
+    printf("No of Ports to scan: %d\n", port_count);
+    printf("Scans to be performed: ");
+    while (scans)
+    {
+        printf("%s ", macro_string_rep(scans->type));
+        scans = scans->next;
+    }
+    printf("\nNo of threads: %d\n", thread_count);
+    printf("Scanning...\n");
+}
+
 // int main()
 // {
 //     t_scan  scan1;
@@ -125,7 +140,7 @@ void    print_table(char *title, t_port *data, int scan_counter)
 //     data.category = CLOSED;
 //     data.scans = &scan1;
 //     data.next = NULL;
-    
+//     print_stats("8.8.8.8", 1, &scan1, 2);
 //     print_table("close ports", &data, 3);
 //     return 0;
 // }
