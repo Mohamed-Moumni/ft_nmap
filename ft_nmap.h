@@ -149,11 +149,12 @@ int		ft_d_strlen(char **av);
 bool	parse_ip_hostname(char *param, t_input *input);
 char	*get_next_line(int fd);
 
-int		add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_t addrlen, bool disc);
-bool	host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len);
-bool	perform_scan(t_input *input, t_ipaddr *ipaddr, int scan);
-void	print_error(const char *format, ...);
+int				add_node(t_ipaddr **list, char *ipaddr, struct sockaddr *sockaddr, socklen_t addrlen, bool disc);
+bool			host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len);
+bool			perform_scan(t_input *input, t_ipaddr *ipaddr, int scan);
+void			print_error(const char *format, ...);
 unsigned short	checksum(void *b, int len);
+t_list			*return_all_scans(void);
 
 // list methods
 t_list	*list_new(void *data, size_t data_size);

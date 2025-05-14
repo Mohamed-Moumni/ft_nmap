@@ -38,3 +38,16 @@ int	ft_d_strlen(char **av)
 		i++;
 	return (i);
 }
+
+t_list	*return_all_scans(void)
+{
+	t_list *to_return;
+
+	list_add(&to_return, list_new(SYN_SCAN, sizeof(int)));
+	list_add(&to_return, list_new(NULL_SCAN, sizeof(int)));
+	list_add(&to_return, list_new(FIN_SCAN, sizeof(int)));
+	list_add(&to_return, list_new(XMAS_SCAN, sizeof(int)));
+	list_add(&to_return, list_new(ACK_SCAN, sizeof(int)));
+	list_add(&to_return, list_new(UDP_SCAN, sizeof(int)));
+	return to_return;
+}

@@ -75,6 +75,8 @@ int main(int argc, char **argv)
 	// checks if the only required field is there
 	if (!ipaddr)
 		print_help();
+	if (!input.scans)
+		input.scans = return_all_scans();
 	nmap_loop(&input);
 	return 0;
 }
