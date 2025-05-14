@@ -143,3 +143,14 @@ t_nmap  *create_nmap_node(t_ipaddr *ipaddr)
     nmap->ipaddr = ipaddr;
     return nmap;
 }
+
+int generate_random_id(void)
+{
+    struct timeval  curr_time;
+    int             random;
+
+    gettimeofday(&curr_time, NULL);
+    random = rand_r((unsigned int *)&curr_time.tv_sec) / 10000;
+    int ranged = MIN + random % (MAX - MIN + 1);
+    return random;
+}

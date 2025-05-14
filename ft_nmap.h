@@ -27,6 +27,9 @@
 #include <pthread.h>
 #include <pcap.h>
 
+#define MIN 25000
+#define MAX 65000
+
 #define	ALL_SCAN  -1
 #define	SYN_SCAN  0
 #define NULL_SCAN 4
@@ -200,4 +203,7 @@ int					syn_handler(const u_char *packet);
 int					FNX_handler(const u_char *packet);
 void				scan_add(t_scan **scans, t_scan *new_scan);
 void				port_add(t_port **ports, t_port *new_port);
+
+// utils
+int					generate_random_id(void);
 #endif
