@@ -41,13 +41,19 @@ int	ft_d_strlen(char **av)
 
 t_list	*return_all_scans(void)
 {
-	t_list *to_return;
+	t_list	*to_return;
+	int		syn = SYN_SCAN;
+	int		null = NULL_SCAN;
+	int		fin = FIN_SCAN;
+	int		xmas = XMAS_SCAN;
+	int		ack = ACK_SCAN;
+	int		udp = UDP_SCAN;
 
-	list_add(&to_return, list_new(SYN_SCAN, sizeof(int)));
-	list_add(&to_return, list_new(NULL_SCAN, sizeof(int)));
-	list_add(&to_return, list_new(FIN_SCAN, sizeof(int)));
-	list_add(&to_return, list_new(XMAS_SCAN, sizeof(int)));
-	list_add(&to_return, list_new(ACK_SCAN, sizeof(int)));
-	list_add(&to_return, list_new(UDP_SCAN, sizeof(int)));
+	list_add(&to_return, list_new(&syn, sizeof(int)));
+	list_add(&to_return, list_new(&null, sizeof(int)));
+	list_add(&to_return, list_new(&fin, sizeof(int)));
+	list_add(&to_return, list_new(&xmas, sizeof(int)));
+	list_add(&to_return, list_new(&ack, sizeof(int)));
+	list_add(&to_return, list_new(&udp, sizeof(int)));
 	return to_return;
 }
