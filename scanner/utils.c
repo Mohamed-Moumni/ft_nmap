@@ -74,6 +74,40 @@ void    list_free(t_list **list_item)
     }
 }
 
+void    scan_add(t_scan **scans, t_scan *new_scan)
+{
+    t_scan *temp_item;
+
+    if ((*scans) == NULL)
+        (*scans) = new_scan;
+    else
+    {
+        temp_item = (*scans);
+        while (temp_item->next)
+        {
+            temp_item = temp_item->next;
+        }
+        temp_item->next = new_scan;
+    }
+}
+
+void    port_add(t_port **ports, t_port *new_port)
+{
+    t_port *temp_item;
+
+    if ((*ports) == NULL)
+        (*ports) = new_port;
+    else
+    {
+        temp_item = (*ports);
+        while (temp_item->next)
+        {
+            temp_item = temp_item->next;
+        }
+        temp_item->next = new_port;
+    }
+}
+
 t_scan  *create_scan(int type)
 {
     t_scan *scan = malloc(sizeof(t_scan));

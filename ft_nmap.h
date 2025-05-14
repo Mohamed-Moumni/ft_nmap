@@ -83,6 +83,7 @@ typedef struct s_scan
 {
 	int				type;
 	int				state;
+	struct s_scan	*next;
 }	t_scan;
 
 typedef struct s_port
@@ -91,6 +92,7 @@ typedef struct s_port
 	int				service;
 	int				category;
 	t_scan			*scans;
+	struct s_port	*next;
 }	t_port;
 
 typedef struct s_nmap
@@ -107,12 +109,18 @@ typedef struct s_routine_arg {
 	int		port_range;
 } t_routine_arg;
 
+typedef struct s_thread_res {
+	t_port	*closed_ports;
+	t_port	*open_ports;
+}t_thread_res;
+
+
 typedef struct s_pseudo_header {
-    uint32_t source_address;
-    uint32_t dest_address;
-    uint8_t placeholder;
-    uint8_t protocol;
-    uint16_t tcp_length;
+    uint32_t	source_address;
+    uint32_t	dest_address;
+    uint8_t		placeholder;
+    uint8_t		protocol;
+    uint16_t	tcp_length;
 }t_pseudo_header;
 
 typedef struct s_probe
@@ -165,7 +173,7 @@ char *tcp_header(int tcp_byte);
 
 // threads
 void	*thread_routine(void* arg);
-void	join_threads(t_list *threads);
+void	join_threads(t_list *threads, t_nmap **nmap_list);
 
 // nmap strucuts
 t_scan	*create_scan(int type);
@@ -189,6 +197,6 @@ int					tcp_scan(const char *ip_addr, int scan_type, int port, int socketk, int)
 int					ack_handler(const u_char *packet);
 int					syn_handler(const u_char *packet);
 int					FNX_handler(const u_char *packet);
-
-
+void				scan_add(t_scan **scans, t_scan *new_scan);
+void				port_add(t_port **ports, t_port *new_port);
 #endif

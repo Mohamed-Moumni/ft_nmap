@@ -33,26 +33,49 @@ void nmap_loop(t_input *nmap_input)
 				pthread_t *thread;
 
 				thread = malloc(sizeof(pthread_t));
-				list_add(&threads, list_new(thread, sizeof(pthread_t *)));
-				t_routine_arg routine_arg;
+				t_list	*thread_node = list_new(thread, sizeof(pthread_t));
+				list_add(&threads, thread_node);
+				t_routine_arg *routine_arg;
 
+				routine_arg = malloc(sizeof(t_routine_arg));
 				next_port_head = next_head_ports(nmap_input->ports, offset);
-				routine_arg.nmap = nmap_node;
-				routine_arg.port_range = step_count + remainder;
-				routine_arg.scans = nmap_input->scans;
-				routine_arg.ports = next_port_head;
+				routine_arg->nmap = nmap_node;
+				routine_arg->port_range = step_count + remainder;
+				routine_arg->scans = nmap_input->scans;
+				routine_arg->ports = next_port_head;
+				routine_arg->nmap->closed_ports = NULL;
+				routine_arg->nmap->open_ports = NULL;
 
 				// create the thread
-				int error = pthread_create(thread, NULL, thread_routine, &routine_arg);
+				int error = pthread_create(((pthread_t *)thread_node->data), NULL, thread_routine, routine_arg);
 				if (error != 0)
 					print_error("Pthread Create: %s\n", strerror(error));
-				pthread_join(*thread, NULL);
 				remainder = remainder > 0 ? 0 : remainder;
 				offset += step_count;
 			}
+			join_threads(threads, (t_nmap **)&nmap_list_node->data);
 			list_free(&threads);
+			t_port *open_ports;
+			t_port *closed_ports;
+
+			t_nmap *nmap_test = (t_nmap *)nmap_list_node->data;
+			open_ports = nmap_test->open_ports;
+			closed_ports = nmap_test->closed_ports;
+			printf("OPEN Ports\n");
+			while (open_ports)
+			{
+				printf("Port Number: %d\n", open_ports->port_number);
+				open_ports = open_ports->next;
+			}
+			printf("CLOSED Ports\n");
+			while (closed_ports)
+			{
+				printf("Port Number: %d\n", closed_ports->port_number);
+				closed_ports = closed_ports->next;
+			}
             // sorting the result by port number
 			list_add(&nmap, nmap_list_node);
+			
 		}
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}
