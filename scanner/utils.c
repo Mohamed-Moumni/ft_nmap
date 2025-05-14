@@ -17,16 +17,10 @@ t_list  *list_new(void *data, size_t data_size)
 {
     t_list *new_item = malloc(sizeof(t_list));
     if (!new_item)
-    {
         print_error("Memory Allocation error: New List Item can't be allocated");
-        exit(1);
-    }
     new_item->data = malloc(data_size);
     if (!new_item->data)
-    {
         print_error("Memory allocation error: New Data Item can't be allocated");
-        exit(1);
-    }
     memcpy(new_item->data, data, data_size);
     new_item->next = NULL;
     return new_item;
@@ -112,10 +106,7 @@ t_scan  *create_scan(int type)
 {
     t_scan *scan = malloc(sizeof(t_scan));
     if (!scan)
-    {
         print_error("Memory Allocation error: Scan Item Can't Be allocated");
-        exit(1);
-    }
     scan->type = type;
     return scan;
 }
@@ -124,10 +115,7 @@ t_port  *create_port(int port_nb)
 {
     t_port *port = malloc(sizeof(t_port));
     if (!port)
-    {
         print_error("Memory Allocation error: Port Item Can't Be allocated");
-        exit(1);
-    }
     port->port_number = port_nb;
     return port;
 }
@@ -136,10 +124,7 @@ t_nmap  *create_nmap_node(t_ipaddr *ipaddr)
 {
     t_nmap *nmap = malloc(sizeof(t_nmap));
     if (!nmap)
-    {
         print_error("Memory Allocation error: Nmpa Item Can't Be allocated");
-        exit(1);
-    }
     nmap->ipaddr = ipaddr;
     return nmap;
 }
