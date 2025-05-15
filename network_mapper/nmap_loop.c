@@ -63,14 +63,6 @@ void nmap_loop(t_input *nmap_input)
 			list_free(&threads);
 			free(nmap_node);
 			list_add(&nmap, nmap_list_node);
-<<<<<<< HEAD
-			nmap_node = (t_nmap *)nmap_list_node->data;
-			if (nmap_node->open_ports)
-				print_table("Open Ports", nmap_node->open_ports, node_counter(nmap_input->scans));
-			if (nmap_node->closed_ports)
-				print_table("Closed/Filtered/Unfiltered Ports", nmap_node->closed_ports, node_counter(nmap_input->scans));
-=======
->>>>>>> refs/remotes/origin/scans/test-integration
 		}
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}

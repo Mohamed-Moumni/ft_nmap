@@ -92,11 +92,12 @@ void    print_table(char *title, t_port *data, int scan_counter, t_srv *services
                 padding(10);
                 padding(30);
                 result = result_formater(data->scans->type, data->scans->state);
-                printf("%s\n", result);
+                printf("%-30s |\n", result);
                 data->scans = data->scans->next;
             }
         }
         free(result);
+        printf("--------------------------------------------------------------------------------------------\n");
         data = data->next;
     }
 }

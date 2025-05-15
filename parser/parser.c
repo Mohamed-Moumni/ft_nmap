@@ -127,11 +127,6 @@ bool    parse_ports(char    *param, t_input *input)
                 return (false);
             }
             result = atoi(commas_seperated[i]);
-            if (result <= 0 || result > 1024)
-            {
-                printf("ports: Invalid ports value (min = 1, max = 1024)\n");
-                return (false);
-            }
             new_port = list_new(&result, sizeof(int));
             list_add(&input->ports, new_port);
         }
