@@ -58,8 +58,12 @@ void nmap_loop(t_input *nmap_input)
 			join_threads(threads, (t_nmap **)&nmap_list_node->data);
 			list_free(&threads);
 			free(nmap_node);
-			// sorting output
 			list_add(&nmap, nmap_list_node);
+			nmap_node = (t_nmap *)nmap_list_node->data;
+			if (nmap_node->open_ports)
+				print_table("Open Ports", nmap_node->open_ports, 3);
+			if (nmap_node->closed_ports)
+				print_table("Closed/Filtered/Unfiltered ports:", nmap_node->closed_ports, 3);
 		}
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}

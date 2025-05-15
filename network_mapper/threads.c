@@ -93,6 +93,7 @@ void* thread_routine(void* arg)
         routine_arg->ports = routine_arg->ports->next;
         routine_arg->port_range--;
     }
+    close(send_socket);
     return thread_result;
 }
 

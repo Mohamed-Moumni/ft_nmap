@@ -101,7 +101,7 @@ void    print_table(char *title, t_port *data, int scan_counter)
     }
 }
 
-void print_stats(char *ip, int port_count, t_list *scans, int thread_count)
+void print_stats(const char *ip, int port_count, t_list *scans, int thread_count)
 {
     t_scan *scan;
 

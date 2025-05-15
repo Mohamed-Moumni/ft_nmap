@@ -210,7 +210,7 @@ char	*macro_string_rep(int macro);
 char    *result_formater(int scan, int result);
 void    padding(int space_counter);
 void    print_table(char *title, t_port *data, int scan_counter);
-void	print_stats(char *ip, int port_count, t_list *scans, int thread_count);
+void	print_stats(const char *ip, int port_count, t_list *scans, int thread_count);
 
 // utils
 int					generate_random_id(void);
