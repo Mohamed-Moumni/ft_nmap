@@ -26,6 +26,7 @@ void nmap_loop(t_input *nmap_input)
 		{
 			threads = NULL;
 			nmap_node = create_nmap_node(nmap_input->ipaddr);
+			print_stats(nmap_node->ipaddr->ip_addr, nmap_input->port_count, nmap_input->scans, nmap_input->thread_count);
 			nmap_list_node = list_new(nmap_node, sizeof(t_list));
 			// iterate through the threads
 			for (int i = 0; i < nmap_input->thread_count; i++)
@@ -57,6 +58,7 @@ void nmap_loop(t_input *nmap_input)
 			join_threads(threads, (t_nmap **)&nmap_list_node->data);
 			list_free(&threads);
 			free(nmap_node);
+			// sorting output
 			list_add(&nmap, nmap_list_node);
 		}
 		nmap_input->ipaddr = nmap_input->ipaddr->next;

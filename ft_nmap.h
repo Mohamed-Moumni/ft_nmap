@@ -206,7 +206,11 @@ void				scan_add(t_scan **scans, t_scan *new_scan);
 void				port_add(t_port **ports, t_port *new_port);
 
 // ouput
+char	*macro_string_rep(int macro);
+char    *result_formater(int scan, int result);
+void    padding(int space_counter);
 void    print_table(char *title, t_port *data, int scan_counter);
+void	print_stats(char *ip, int port_count, t_list *scans, int thread_count);
 
 // utils
 int					generate_random_id(void);

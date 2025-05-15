@@ -101,46 +101,20 @@ void    print_table(char *title, t_port *data, int scan_counter)
     }
 }
 
-void print_stats(char *ip, int port_count, t_scan *scans, int thread_count)
+void print_stats(char *ip, int port_count, t_list *scans, int thread_count)
 {
+    t_scan *scan;
+
     printf("Scan Configurations\n");
     printf("Target Ip-Address: %s\n", ip);
     printf("No of Ports to scan: %d\n", port_count);
     printf("Scans to be performed: ");
     while (scans)
     {
-        printf("%s ", macro_string_rep(scans->type));
+        scan = (t_scan *)scans->data;
+        printf("%s ", macro_string_rep(scan->type));
         scans = scans->next;
     }
     printf("\nNo of threads: %d\n", thread_count);
     printf("Scanning...\n");
 }
-
-// int main()
-// {
-//     t_scan  scan1;
-//     t_scan  scan2;
-//     t_scan  scan3;
-
-//     scan1.type = SYN_SCAN;
-//     scan1.state = OPEN_FILTERED;
-//     scan1.next = &scan2;
-
-//     scan2.type = ACK_SCAN;
-//     scan2.state = FILTERED;
-//     scan2.next = &scan3;
-
-//     scan3.type = XMAS_SCAN;
-//     scan3.state = OPEN_FILTERED;
-//     scan3.next = NULL;
-
-//     t_port  data;
-//     data.port_number = 2;
-//     data.service = UNASSIGNED;
-//     data.category = CLOSED;
-//     data.scans = &scan1;
-//     data.next = NULL;
-//     print_stats("8.8.8.8", 1, &scan1, 2);
-//     print_table("close ports", &data, 3);
-//     return 0;
-// }
