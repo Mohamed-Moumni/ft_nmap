@@ -7,10 +7,7 @@ int	udp_handler(int udp_sockfd)
 	socklen_t len = sizeof(reply_addr);
 	ssize_t bytes_recv = recvfrom(udp_sockfd, buffer, sizeof(buffer), 0, (struct sockaddr *)&reply_addr, &len);
 	if (bytes_recv < 0)
-	{
-		printf("bytes recv: %ld errno: %d\n", bytes_recv, errno);
 		return OPEN_FILTERED;
-	}
 	return OPEN;
 }
 
@@ -21,21 +18,14 @@ int	icmp_handler(int icmp_sockfd)
 	socklen_t len = sizeof(reply_addr);
 	ssize_t bytes_recv = recvfrom(icmp_sockfd, buffer, sizeof(buffer), 0, (struct sockaddr *)&reply_addr, &len);
 	if (bytes_recv < 0)
-	{
-		printf("bytes recv: %ld errno: %d\n", bytes_recv, errno);
 		return OPEN_FILTERED;
-	}
 	struct iphdr   *ip_hdr = (struct iphdr*)buffer;
 	struct icmp_header *icmp_reply = (struct icmp_header *)(buffer + (ip_hdr->ihl * 4));
-	printf("icmp type: %d icmp code: %d\n", icmp_reply->type, icmp_reply->code);
 	if (icmp_reply->type == 3)
 	{
 		if (icmp_reply->code == 3)
-		{
-			printf("closed\n");
 			return CLOSED;
-		}
-		printf("filtered\n");
+
 		return FILTERED;
 	}
 }
@@ -92,24 +82,15 @@ int udp_scan(char *ip, int port)
 		exit(1);
 	}
 	else if (select_ret == 0)
-	{
-		printf("Time out the result is open|filtered \n");
 		return OPEN_FILTERED;
-	}
 	else
 	{
 		// Handle the udp response
 		if (FD_ISSET(udp_sockfd, &readfds))
-		{
-			printf("udp response\n");
 			return udp_handler(udp_sockfd);
-		}
 		// Handle the icmp response
 		if (FD_ISSET(icmp_sockfd, &readfds))
-		{
-			printf("icmp response\n");
 			return icmp_handler(icmp_sockfd);
-		}
 	}
 	return OPEN;
 }

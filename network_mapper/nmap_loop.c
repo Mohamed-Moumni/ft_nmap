@@ -63,7 +63,7 @@ void nmap_loop(t_input *nmap_input)
 			if (nmap_node->open_ports)
 				print_table("Open Ports", nmap_node->open_ports, node_counter(nmap_input->scans));
 			if (nmap_node->closed_ports)
-				print_table("Closed/Filtered/Unfiltered ports:", nmap_node->closed_ports, node_counter(nmap_input->scans));
+				print_table("Closed/Filtered/Unfiltered Ports", nmap_node->closed_ports, node_counter(nmap_input->scans));
 		}
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}
