@@ -35,6 +35,7 @@ void* thread_routine(void* arg)
     setsockopt(send_socket, IPPROTO_IP, IP_HDRINCL, &value, sizeof(value));
 
     routine_arg = (t_routine_arg *)arg;
+
     thread_result = malloc(sizeof(t_thread_res));
     if (!thread_result)
         print_error("Malloc Error: Thread Result");
@@ -49,9 +50,11 @@ void* thread_routine(void* arg)
         t_port *port_node = create_port(port);
         t_scan *scans = NULL;
         is_open = false;
-        while (routine_arg->scans)
+        t_list *scans_temp = routine_arg->scans;
+
+        while (scans_temp)
         {
-            int     scan = *((int *)routine_arg->scans->data);
+            int     scan = *((int *)scans_temp->data);
             t_scan  *scan_node = create_scan(scan);
             switch (scan)
             {
@@ -83,7 +86,7 @@ void* thread_routine(void* arg)
                     break;
             }
             scan_add(&scans, scan_node);
-            routine_arg->scans = routine_arg->scans->next;
+            scans_temp = scans_temp->next;
         }
         port_node->scans = scans;
         if (is_open)

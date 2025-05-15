@@ -218,6 +218,7 @@ char    *result_formater(int scan, int result);
 void    padding(int space_counter);
 void    print_table(char *title, t_port *data, int scan_counter, t_srv *services);
 void	print_stats(const char *ip, int port_count, t_list *scans, int thread_count);
+void	nmap_print(t_list *nmap_list, int scan_count, t_srv *services);
 
 // utils
 int					generate_random_id(void);

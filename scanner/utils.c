@@ -108,6 +108,7 @@ t_scan  *create_scan(int type)
     if (!scan)
         print_error("Memory Allocation error: Scan Item Can't Be allocated");
     scan->type = type;
+    scan->next = NULL;
     return scan;
 }
 
@@ -117,6 +118,7 @@ t_port  *create_port(int port_nb)
     if (!port)
         print_error("Memory Allocation error: Port Item Can't Be allocated");
     port->port_number = port_nb;
+    port->next = NULL;
     return port;
 }
 
