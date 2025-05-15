@@ -45,6 +45,7 @@
 #define UNFILTERED 3
 #define	UNASSIGNED 6
 
+
 typedef struct s_list
 {
 	void	*data;
@@ -138,6 +139,12 @@ typedef struct sock{
 	socklen_t socket_len;
 } t_sock;
 
+typedef struct s_service
+{
+	char	*tcp_srv;
+	char	*udp_srv;
+} t_srv;
+
 extern t_connect connection;
 
 bool    parse_ip(char   *param, t_input *input);
@@ -209,9 +216,11 @@ void				port_add(t_port **ports, t_port *new_port);
 char	*macro_string_rep(int macro);
 char    *result_formater(int scan, int result);
 void    padding(int space_counter);
-void    print_table(char *title, t_port *data, int scan_counter);
+void    print_table(char *title, t_port *data, int scan_counter, t_srv *services);
 void	print_stats(const char *ip, int port_count, t_list *scans, int thread_count);
 
 // utils
 int					generate_random_id(void);
+t_srv				*service_mapper(void);
+
 #endif
