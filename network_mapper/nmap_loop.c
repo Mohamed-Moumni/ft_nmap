@@ -39,7 +39,7 @@ void nmap_loop(t_input *nmap_input)
 
 				routine_arg = malloc(sizeof(t_routine_arg));
 				next_port_head = next_head_ports(nmap_input->ports, offset);
-				routine_arg->nmap = nmap_node;
+				routine_arg->nmap = (t_nmap *)nmap_list_node->data;
 				routine_arg->port_range = step_count + remainder;
 				routine_arg->scans = nmap_input->scans;
 				routine_arg->ports = next_port_head;
@@ -52,30 +52,12 @@ void nmap_loop(t_input *nmap_input)
 					print_error("Pthread Create: %s\n", strerror(error));
 				remainder = remainder > 0 ? 0 : remainder;
 				offset += step_count;
+				free(thread);
 			}
 			join_threads(threads, (t_nmap **)&nmap_list_node->data);
 			list_free(&threads);
-			t_port *open_ports;
-			t_port *closed_ports;
-
-			t_nmap *nmap_test = (t_nmap *)nmap_list_node->data;
-			open_ports = nmap_test->open_ports;
-			closed_ports = nmap_test->closed_ports;
-			printf("OPEN Ports\n");
-			while (open_ports)
-			{
-				printf("Port Number: %d\n", open_ports->port_number);
-				open_ports = open_ports->next;
-			}
-			printf("CLOSED Ports\n");
-			while (closed_ports)
-			{
-				printf("Port Number: %d\n", closed_ports->port_number);
-				closed_ports = closed_ports->next;
-			}
-            // sorting the result by port number
+			free(nmap_node);
 			list_add(&nmap, nmap_list_node);
-			
 		}
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}

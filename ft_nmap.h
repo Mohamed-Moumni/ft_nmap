@@ -27,6 +27,9 @@
 #include <pthread.h>
 #include <pcap.h>
 
+#define MIN 25000
+#define MAX 65000
+
 #define	ALL_SCAN  -1
 #define	SYN_SCAN  0
 #define NULL_SCAN 4
@@ -205,4 +208,6 @@ void				port_add(t_port **ports, t_port *new_port);
 // ouput
 void    print_table(char *title, t_port *data, int scan_counter);
 
+// utils
+int					generate_random_id(void);
 #endif

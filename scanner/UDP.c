@@ -113,14 +113,3 @@ int udp_scan(char *ip, int port)
 	}
 	return OPEN;
 }
-
-// int main()
-// {
-//     char    *ip = "8.8.8.8";
-//     int		port = 80;
-// 	t_scan	udp_result;
-
-// 	udp_result.type = UDP_SCAN;
-// 	udp_result.state = udp_scan(ip, port);
-//     return 0;
-// }

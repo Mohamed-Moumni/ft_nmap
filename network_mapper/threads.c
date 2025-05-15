@@ -37,17 +37,15 @@ void* thread_routine(void* arg)
     routine_arg = (t_routine_arg *)arg;
     thread_result = malloc(sizeof(t_thread_res));
     if (!thread_result)
-    print_error("Malloc Error: Thread Result");
+        print_error("Malloc Error: Thread Result");
     thread_result->open_ports = NULL;
     thread_result->closed_ports = NULL;
-    printf("Thread Routine Method!!\n");
-    printf("Port Range: %d\n", routine_arg->port_range);
+    
     // starting the process of port scanning for the start to the end
     // for each port do the available scan that should performed
     while (routine_arg->ports && routine_arg->port_range > 0)
     {
         int port = *((int *)routine_arg->ports->data);
-        printf("Port number: %d\n", port);
         t_port *port_node = create_port(port);
         t_scan *scans = NULL;
         is_open = false;
@@ -87,6 +85,7 @@ void* thread_routine(void* arg)
             scan_add(&scans, scan_node);
             routine_arg->scans = routine_arg->scans->next;
         }
+        port_node->scans = scans;
         if (is_open)
             port_add(&thread_result->open_ports, port_node);
         else
