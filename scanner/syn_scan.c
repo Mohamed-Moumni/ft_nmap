@@ -209,3 +209,51 @@ int tcp_scan(const char *ip_addr, int flag, int port, int socket, int scan_type)
     free(filter);
     return response;
 }
+
+void update_conculsion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state)
+{
+    if ((*state_counter) > (*max_state_occur))
+    {
+        (*max_state_occur) = (*state_counter);
+        *conclusion = scan_state;
+    }
+}
+
+int get_scan_conclusion(t_scan *scans)
+{
+    // open | closed | filtered | unfiltered | open_filtered
+    int state_counter[5] = {0};
+    int max_state_occur = 0;
+    int conclusion = OPEN;
+
+    while (scans)
+    {
+        switch (scans->state)
+        {
+        case OPEN:
+            state_counter[0]++;
+            update_conculsion(&max_state_occur, &conclusion, &state_counter[0], OPEN);
+            break;
+        case CLOSED:
+            state_counter[1]++;
+            update_conculsion(&max_state_occur, &conclusion, &state_counter[1], CLOSED);
+            break;
+        case FILTERED:
+            state_counter[2]++;
+            update_conculsion(&max_state_occur, &conclusion, &state_counter[2], FILTERED);
+            break;
+        case UNFILTERED:
+            update_conculsion(&max_state_occur, &conclusion, &state_counter[3], UNFILTERED);
+            state_counter[3]++;
+            break;
+        case OPEN_FILTERED:
+            update_conculsion(&max_state_occur, &conclusion, &state_counter[4], OPEN_FILTERED);
+            state_counter[4]++;
+            break;
+        default:
+            break;
+        }
+        scans = scans->next;
+    }
+    return conclusion;
+}

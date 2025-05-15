@@ -107,7 +107,7 @@ void nmap_print(t_list *nmap_list, int scan_count, t_srv *services)
 		t_nmap *nmap;
 
 		nmap = (t_nmap *)nmap_list->data;
-		printf("\033[0;32mScanning Results for %s:\033[0m\\n", nmap->ipaddr->ip_addr);
+		printf("\033[0;32mScanning Results for %s:\033[0m\n", nmap->ipaddr->ip_addr);
 		if (nmap->open_ports)
 			print_table("Open Ports", nmap->open_ports, scan_count, services);
 		if (nmap->closed_ports)

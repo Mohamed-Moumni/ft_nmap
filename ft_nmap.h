@@ -37,12 +37,12 @@
 #define	FIN_SCAN  9
 #define	XMAS_SCAN 13
 #define UDP_SCAN  22
-#define CLOSED 5
 #define	OPEN_FILTERED 11
 #define OPEN 1
 #define FILTERED 2
-#define TTL 128
+#define CLOSED 5
 #define UNFILTERED 3
+#define TTL 128
 #define	UNASSIGNED 6
 
 
@@ -135,8 +135,8 @@ typedef struct s_probe
 } t_probe;
 
 typedef struct sock{
-	struct sockaddr_in socket;
-	socklen_t socket_len;
+	struct sockaddr_in	socket;
+	socklen_t			socket_len;
 } t_sock;
 
 typedef struct s_service
@@ -211,6 +211,8 @@ int					syn_handler(const u_char *packet);
 int					FNX_handler(const u_char *packet);
 void				scan_add(t_scan **scans, t_scan *new_scan);
 void				port_add(t_port **ports, t_port *new_port);
+int					get_scan_conclusion(t_scan *scans);
+void				update_conculsion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state);
 
 // ouput
 char	*macro_string_rep(int macro);

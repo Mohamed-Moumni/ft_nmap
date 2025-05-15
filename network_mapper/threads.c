@@ -42,15 +42,15 @@ void    *thread_routine(void* arg)
     thread_result->open_ports = NULL;
     thread_result->closed_ports = NULL;
     
-    // starting the process of port scanning for the start to the end
-    // for each port do the available scan that should performed
+    // starting the process of port scanning
+    // for each port the available scan will be performed
     while (routine_arg->ports && routine_arg->port_range > 0)
     {
-        int port = *((int *)routine_arg->ports->data);
-        t_port *port_node = create_port(port);
-        t_scan *scans = NULL;
+        int     port = *((int *)routine_arg->ports->data);
+        t_port  *port_node = create_port(port);
+        t_scan  *scans = NULL;
+        t_list  *scans_temp = routine_arg->scans;
         is_open = false;
-        t_list *scans_temp = routine_arg->scans;
 
         while (scans_temp)
         {
@@ -89,6 +89,7 @@ void    *thread_routine(void* arg)
             scans_temp = scans_temp->next;
         }
         port_node->scans = scans;
+        port_node->category = get_scan_conclusion(scans);
         if (is_open)
             port_add(&thread_result->open_ports, port_node);
         else

@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/ft_nmap",
+      "args": ["--ports", "1-100", "--speedup", "10", "--scan", "SYN", "--ip", "8.8.8.8"],
+      "environment": [
+        {
+          "name": "config",
+          "value": "Debug"
+        }
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
