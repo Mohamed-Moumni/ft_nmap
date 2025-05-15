@@ -38,7 +38,6 @@ int syn_handler(const u_char *packet)
 {
     if (packet)
     {
-        printf("Syn handler\n");
         const char  *ip_header = packet + 14;
         struct ip   *iph = (struct ip *)ip_header;
         int         ip_header_len = iph->ip_hl * 4;

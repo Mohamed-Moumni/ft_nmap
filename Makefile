@@ -1,5 +1,5 @@
 SRC = ./main.c ./parser/parser.c ./parser/outils.c ./parser/ft_split.c \
-	  ./parser/ip_file_parse.c ./parser/gnl.c ./parser/ipaddr.c ./network_mapper/host_discovery.c \
+	  ./parser/ip_file_parse.c ./parser/gnl.c ./parser/service_mapper.c ./parser/ipaddr.c ./network_mapper/host_discovery.c \
 	  ./scanner/utils.c ./network_mapper/threads.c ./network_mapper/nmap_loop.c ./scanner/UDP.c \
 	  ./scanner/syn_scan.c ./scanner/tcp_handler.c ./output/printing_tables.c
 

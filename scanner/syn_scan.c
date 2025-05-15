@@ -90,7 +90,7 @@ bool check_time_out(struct timeval *start_time)
     struct timeval  current_time;
 
     gettimeofday(&current_time, NULL);
-    if (current_time.tv_sec - start_time->tv_sec >= 5)
+    if (current_time.tv_sec - start_time->tv_sec >= 3)
         return true;
     return false;
 }

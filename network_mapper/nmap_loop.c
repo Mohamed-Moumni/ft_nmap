@@ -10,10 +10,13 @@ void nmap_loop(t_input *nmap_input)
 	int		offset;
 	int		step_count;
 	int		remainder;
+	int		scan_counter;
+	t_srv	*services;
 
 	nmap = NULL;
-	offset = 0;
+	services = service_mapper();
 	remainder = 0;
+	scan_counter = node_counter(nmap_input->scans);
 	step_count = nmap_input->port_count <= nmap_input->thread_count ? 1 : nmap_input->port_count / nmap_input->thread_count;
 	if (nmap_input->port_count <= nmap_input->thread_count)
 		nmap_input->thread_count = nmap_input->port_count;
@@ -25,6 +28,7 @@ void nmap_loop(t_input *nmap_input)
 		if (nmap_input->ipaddr->discovery)
 		{
 			threads = NULL;
+			offset = 0;
 			nmap_node = create_nmap_node(nmap_input->ipaddr);
 			print_stats(nmap_node->ipaddr->ip_addr, nmap_input->port_count, nmap_input->scans, nmap_input->thread_count);
 			nmap_list_node = list_new(nmap_node, sizeof(t_list));
@@ -59,12 +63,31 @@ void nmap_loop(t_input *nmap_input)
 			list_free(&threads);
 			free(nmap_node);
 			list_add(&nmap, nmap_list_node);
+<<<<<<< HEAD
 			nmap_node = (t_nmap *)nmap_list_node->data;
 			if (nmap_node->open_ports)
 				print_table("Open Ports", nmap_node->open_ports, node_counter(nmap_input->scans));
 			if (nmap_node->closed_ports)
 				print_table("Closed/Filtered/Unfiltered Ports", nmap_node->closed_ports, node_counter(nmap_input->scans));
+=======
+>>>>>>> refs/remotes/origin/scans/test-integration
 		}
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
+	}
+	nmap_print(nmap, scan_counter, services);
+}
+
+void nmap_print(t_list *nmap_list, int scan_count, t_srv *services)
+{
+	while (nmap_list)
+	{
+		t_nmap *nmap;
+
+		nmap = (t_nmap *)nmap_list->data;
+		if (nmap->open_ports)
+			print_table("Open Ports", nmap->open_ports, scan_count, services);
+		if (nmap->closed_ports)
+			print_table("Closed/Filtered/Unfiltered ports:", nmap->closed_ports, scan_count, services);
+		nmap_list = nmap_list->next;
 	}
 }

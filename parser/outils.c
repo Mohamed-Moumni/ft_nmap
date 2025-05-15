@@ -42,6 +42,10 @@ int	ft_d_strlen(char **av)
 t_list	*return_all_scans(void)
 {
 	t_list	*to_return = NULL;
+<<<<<<< HEAD
+=======
+
+>>>>>>> refs/remotes/origin/scans/test-integration
 	int		syn = SYN_SCAN;
 	int		null = NULL_SCAN;
 	int		fin = FIN_SCAN;

@@ -22,13 +22,11 @@ int main(int argc, char **argv)
 
 	i = 1;
 	ipaddr = false;
-	// init the input struct
 	input.scans = NULL;
 	input.ipaddr = NULL;
 	input.ports = NULL;
 	input.port_count = 0;
 	input.thread_count = 0;
-	// handles ./ft_nmap & ./ft_nmap --help
 	if (argc == 1 || (argc == 2 && !strcmp("--help", argv[1])))
 		print_help();
 	if (argc % 2 == 0)

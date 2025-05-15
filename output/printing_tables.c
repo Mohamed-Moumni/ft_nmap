@@ -69,7 +69,7 @@ void    padding(int space_counter)
     printf(" | ");
 }
 
-void    print_table(char *title, t_port *data, int scan_counter)
+void    print_table(char *title, t_port *data, int scan_counter, t_srv *services)
 {
     char    *result;
     char    *svc_name;
@@ -81,7 +81,7 @@ void    print_table(char *title, t_port *data, int scan_counter)
     while (data)
     {
         result = result_formater(data->scans->type, data->scans->state);
-        svc_name = macro_string_rep(data->service);
+        svc_name = services[data->port_number - 1].tcp_srv;
         conclusion = macro_string_rep(data->category);
         printf("%-10d | %-30s | %-30s | %-10s\n", data->port_number, svc_name, result, conclusion);
         if (scan_counter > 1)
