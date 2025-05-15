@@ -93,6 +93,7 @@ void nmap_loop(t_input *nmap_input)
 			}
 			list_add(&nmap, nmap_list_node);
 		}
+		printf("\033[0;32mScanning ip: %s is Finished\033[0m\n", nmap_node->ipaddr->ip_addr);
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}
 	nmap_print(nmap, scan_counter, services);
@@ -100,11 +101,13 @@ void nmap_loop(t_input *nmap_input)
 
 void nmap_print(t_list *nmap_list, int scan_count, t_srv *services)
 {
+	
 	while (nmap_list)
 	{
 		t_nmap *nmap;
 
 		nmap = (t_nmap *)nmap_list->data;
+		printf("\033[0;32mScanning Results for %s:\033[0m\\n", nmap->ipaddr->ip_addr);
 		if (nmap->open_ports)
 			print_table("Open Ports", nmap->open_ports, scan_count, services);
 		if (nmap->closed_ports)
