@@ -23,7 +23,7 @@ void	join_threads(t_list *threads, t_nmap **nmap_list)
 void    *thread_routine(void* arg)
 {     
     t_routine_arg   *routine_arg;
-    int             send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
+    int             send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
     int             value;
     char            *filter;
     bool            is_open;
