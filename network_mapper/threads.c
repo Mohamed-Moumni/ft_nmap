@@ -35,7 +35,6 @@ void    *thread_routine(void* arg)
     setsockopt(send_socket, IPPROTO_IP, IP_HDRINCL, &value, sizeof(value));
 
     routine_arg = (t_routine_arg *)arg;
-
     thread_result = malloc(sizeof(t_thread_res));
     if (!thread_result)
         print_error("Malloc Error: Thread Result");
@@ -50,6 +49,7 @@ void    *thread_routine(void* arg)
         t_port  *port_node = create_port(port);
         t_scan  *scans = NULL;
         t_list  *scans_temp = routine_arg->scans;
+        char    *filter = build_filter(routine_arg->nmap->ipaddr->ip_addr, port);
         is_open = false;
 
         while (scans_temp)
@@ -59,27 +59,28 @@ void    *thread_routine(void* arg)
             switch (scan)
             {
                 case UDP_SCAN:
-                    scan_node->state = udp_scan(routine_arg->nmap->ipaddr->ip_addr, port);
+                    // Integrate your udp implementation HERE!
+                    // scan_node->state = udp_scan(routine_arg->nmap->ipaddr->ip_addr, port);
                     is_open = scan_node->state != OPEN ? false : true;
                     break;
                 case NULL_SCAN:
-                    scan_node->state = tcp_scan(routine_arg->nmap->ipaddr->ip_addr, 0, port, send_socket, NULL_SCAN);
+                    scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, 0, port, send_socket, NULL_SCAN);
                     is_open = scan_node->state != OPEN ? false : true;
                     break;
                 case ACK_SCAN:
-                    scan_node->state = tcp_scan(routine_arg->nmap->ipaddr->ip_addr, TH_ACK, port, send_socket, ACK_SCAN);
+                    scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, TH_ACK, port, send_socket, ACK_SCAN);
                     is_open = scan_node->state != OPEN ? false : true;
                     break;
                 case XMAS_SCAN:
-                    scan_node->state = tcp_scan(routine_arg->nmap->ipaddr->ip_addr, TH_FIN | TH_PUSH | TH_URG, port, send_socket, XMAS_SCAN);
+                    scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, TH_FIN | TH_PUSH | TH_URG, port, send_socket, XMAS_SCAN);
                     is_open = scan_node->state != OPEN ? false : true;
                     break;
                 case FIN_SCAN:
-                    scan_node->state = tcp_scan(routine_arg->nmap->ipaddr->ip_addr, TH_FIN, port, send_socket, FIN_SCAN);
+                    scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, TH_FIN, port, send_socket, FIN_SCAN);
                     is_open = scan_node->state != OPEN ? false : true;
                     break;
                 case SYN_SCAN:
-                    scan_node->state = tcp_scan(routine_arg->nmap->ipaddr->ip_addr, TH_SYN, port, send_socket, SYN_SCAN);
+                    scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, TH_SYN, port, send_socket, SYN_SCAN);
                     is_open = scan_node->state != OPEN ? false : true;
                     break;
                 default:
@@ -94,6 +95,7 @@ void    *thread_routine(void* arg)
             port_add(&thread_result->open_ports, port_node);
         else
             port_add(&thread_result->closed_ports, port_node);
+        free(filter);
         routine_arg->ports = routine_arg->ports->next;
         routine_arg->port_range--;
     }

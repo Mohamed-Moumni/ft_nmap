@@ -1,36 +1,35 @@
 #include "../ft_nmap.h"
 
-void generate_ip_header(t_probe *probe_request, struct in_addr ip_source, struct in_addr ip_destination)
+void generate_ip_header(struct ip *ip_header, struct in_addr ip_source, struct in_addr ip_destination, int protocol)
 {
-    probe_request->ip_header.ip_v = 4;
-    probe_request->ip_header.ip_hl = 5;
-    probe_request->ip_header.ip_tos = 0;
-    probe_request->ip_header.ip_len = htons(sizeof(struct ip) + sizeof(struct tcphdr));
-    probe_request->ip_header.ip_id = htons(generate_random_id());
-    probe_request->ip_header.ip_off = htons(0);
-    probe_request->ip_header.ip_ttl = TTL;
-    probe_request->ip_header.ip_p = IPPROTO_TCP;
-    probe_request->ip_header.ip_sum = 0;
-    probe_request->ip_header.ip_src = ip_source;
-    probe_request->ip_header.ip_dst = ip_destination;
-    probe_request->ip_header.ip_sum = checksum((void *)(&probe_request->ip_header), sizeof(struct ip));
+    ip_header->ip_v = 4;
+    ip_header->ip_hl = 5;
+    ip_header->ip_tos = 0;
+    ip_header->ip_len = htons(sizeof(struct ip) + sizeof(struct tcphdr));
+    ip_header->ip_id = htons(generate_random_id());
+    ip_header->ip_off = htons(0);
+    ip_header->ip_ttl = TTL;
+    ip_header->ip_p = protocol;
+    ip_header->ip_sum = 0;
+    ip_header->ip_src = ip_source;
+    ip_header->ip_dst = ip_destination;
+    ip_header->ip_sum = checksum((void *)ip_header, sizeof(struct ip));
 }
 
-void generate_tcp_header(int port, int scan_type, t_probe *probe_request, struct in_addr ip_source, struct in_addr ip_destination)
+void generate_tcp_header(struct tcphdr *tcp_header, struct in_addr ip_source, struct in_addr ip_destination, int port, int scan_type)
 {
     t_pseudo_header pseudo_header;
-    char            buf[1024];
+    char            buf[1024] = {0};
 
-    memset(buf, 0, 1024);
-    probe_request->tcp_header.th_sport = htons(generate_random_id());
-    probe_request->tcp_header.th_dport = htons(port);
-    probe_request->tcp_header.th_seq = htonl(0);
-    probe_request->tcp_header.th_ack = 0;
-    probe_request->tcp_header.th_off = 5;
-    probe_request->tcp_header.th_flags = scan_type;
-    probe_request->tcp_header.th_win = htons(65535);
-    probe_request->tcp_header.th_sum = 0;
-    probe_request->tcp_header.th_urp = 0;
+    tcp_header->th_sport = htons(generate_random_id());
+    tcp_header->th_dport = htons(port);
+    tcp_header->th_seq = htonl(0);
+    tcp_header->th_ack = 0;
+    tcp_header->th_off = 5;
+    tcp_header->th_flags = scan_type;
+    tcp_header->th_win = htons(65535);
+    tcp_header->th_sum = 0;
+    tcp_header->th_urp = 0;
 
     pseudo_header.source_address = ip_source.s_addr;
     pseudo_header.dest_address = ip_destination.s_addr;
@@ -39,50 +38,9 @@ void generate_tcp_header(int port, int scan_type, t_probe *probe_request, struct
     pseudo_header.tcp_length = htons(sizeof(struct tcphdr));
 
     memcpy(buf, &pseudo_header, sizeof(t_pseudo_header));
-    memcpy(buf + sizeof(t_pseudo_header), &probe_request->tcp_header, sizeof(struct tcphdr));
+    memcpy(buf + sizeof(t_pseudo_header), tcp_header, sizeof(struct tcphdr));
 
-    probe_request->tcp_header.th_sum = checksum(buf, sizeof(t_pseudo_header) + sizeof(struct tcphdr));
-}
-
-struct sockaddr_in  get_local_address(void)
-{
-    int                 sock;
-    struct sockaddr_in  local_addr;
-    struct sockaddr_in  dummy_dest;
-    socklen_t addr_len = sizeof(local_addr);
-
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sock < 0)
-        print_error("Socket Error: %s", strerror(sock));
-
-    memset(&dummy_dest, 0, sizeof(dummy_dest));
-    dummy_dest.sin_family = AF_INET;
-    dummy_dest.sin_port = htons(53);
-    inet_pton(AF_INET, "8.8.8.8", &dummy_dest.sin_addr);
-
-    if (connect(sock, (struct sockaddr *)&dummy_dest, sizeof(dummy_dest)) < 0)
-        print_error("Connect Error: ");
-
-    if (getsockname(sock, (struct sockaddr *)&local_addr, &addr_len) < 0)
-        print_error("GetSockName Error: ");
-    close(sock);
-    return local_addr;
-}
-
-t_sock get_target_address(const char *target_addr, int port)
-{
-    int                 sock;
-    t_sock              tsock;
-    struct sockaddr_in  dest_addr;
-    socklen_t           addr_len = sizeof(dest_addr);
-
-    memset(&dest_addr, 0, sizeof(dest_addr));
-    dest_addr.sin_family = AF_INET;
-    dest_addr.sin_port = htons(port);
-    inet_pton(AF_INET, target_addr, &dest_addr.sin_addr);
-    tsock.socket = dest_addr;
-    tsock.socket_len = addr_len;
-    return tsock;
+    tcp_header->th_sum = checksum(buf, sizeof(t_pseudo_header) + sizeof(struct tcphdr));
 }
 
 bool check_time_out(struct timeval *start_time)
@@ -95,7 +53,7 @@ bool check_time_out(struct timeval *start_time)
     return false;
 }
 
-const u_char *packet_receive(char *filter_exp)
+const u_char *packet_receive(const char *filter_exp)
 {
     char                errbuf[PCAP_ERRBUF_SIZE];
     pcap_if_t           *alldevs;
@@ -157,57 +115,39 @@ int handle_packet(const u_char *packet, int scan)
         return FNX_handler(packet);
     case FIN_SCAN:
         return FNX_handler(packet);
+    // Integrate your UDP Handler
     default:
         return -1;
     }
 }
 
-void prob_packet(const char *ip_addr, const int port, const int send_socket, int scan_type)
+void send_tcp_packet(t_socket *src_addr, t_socket *dest_addr, const int send_socket, const int port, const int tcp_flag)
 {
-    t_probe *probe;
-    char data[1024];
-    struct sockaddr_in source_address;
-    t_sock tsock;
+    char                data[1024] = {0};
+	struct ip		    ip_header;
+    struct tcphdr       tcp_header;
 
-    memset(data, 0, 1024);
-    probe = malloc(sizeof(t_probe));
-    source_address = get_local_address();
-    tsock = get_target_address(ip_addr, port);
 
-    generate_ip_header(probe, source_address.sin_addr, tsock.socket.sin_addr);
-    generate_tcp_header(port, scan_type, probe, source_address.sin_addr, tsock.socket.sin_addr);
+    generate_ip_header(&ip_header, src_addr->sock_addr.sin_addr, dest_addr->sock_addr.sin_addr, IPPROTO_TCP);
+    generate_tcp_header(&tcp_header, src_addr->sock_addr.sin_addr, dest_addr->sock_addr.sin_addr, port, tcp_flag);
 
-    memcpy(data, &probe->ip_header, sizeof(struct ip));
-    memcpy(data + sizeof(struct ip), &probe->tcp_header, sizeof(struct tcphdr));
+    memcpy(data, &ip_header, sizeof(struct ip));
+    memcpy(data + sizeof(struct ip), &tcp_header, sizeof(struct tcphdr));
 
-    int send_res = sendto(send_socket, (void *)data, sizeof(struct ip) + sizeof(struct tcphdr), 0, (struct sockaddr *)&tsock.socket, tsock.socket_len);
+    int send_res = sendto(send_socket, (void *)data, sizeof(struct ip) + sizeof(struct tcphdr), 0, &dest_addr->sock_addr, dest_addr->sock_len);
     if (send_res < 0)
         print_error("sendto error: %s", strerror(send_res));
 }
 
-char *build_filter(const char *ip, int port)
+int tcp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int tcp_flag, int port, int socket, int scan_type)
 {
-    size_t  buf_size = 10 + strlen(ip) + 15 + 6;
-    char    *filter = malloc(buf_size);
-    if (!filter)
-        print_error("Malloc Error\n");
-    snprintf(filter, buf_size, "src host %s and src port %d", ip, port);
-    return filter;
-}
-
-int tcp_scan(const char *ip_addr, int flag, int port, int socket, int scan_type)
-{
-    char            *filter;
-    int             response;
     const u_char    *packet;
+    int             scan_res;
 
-    prob_packet(ip_addr, port, socket, flag);
-    filter = build_filter(ip_addr, port);
+    send_tcp_packet(src_addr, dest_addr, socket, port, tcp_flag);
     packet = packet_receive(filter);
-    response = handle_packet(packet, scan_type);
-
-    free(filter);
-    return response;
+    scan_res = handle_packet(packet, scan_type);
+    return scan_res;
 }
 
 void update_conculsion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state)

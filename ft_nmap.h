@@ -48,24 +48,24 @@
 
 typedef struct s_list
 {
-	void	*data;
-	struct s_list *next;
+	void			*data;
+	struct s_list	*next;
 }	t_list;
 
 typedef struct s_ipaddr {
 	char			*ip_addr;
-	struct sockaddr *sock_addr;
-	socklen_t       addr_len;
+	struct sockaddr	*sock_addr;
 	bool			discovery;
+	socklen_t       addr_len;
 	struct s_ipaddr	*next;
 }	t_ipaddr;
 
 typedef struct s_input {
-	t_list		*scans;
-	t_list		*ports;
-	int			port_count;
-	int			thread_count;
-	t_ipaddr	*ipaddr;
+	t_list				*scans;
+	t_list				*ports;
+	t_ipaddr			*ipaddr;
+	int					port_count;
+	int					thread_count;
 }	t_input;
 
 typedef struct s_connect {
@@ -107,18 +107,25 @@ typedef struct s_nmap
 	t_port				*closed_ports;
 }	t_nmap;
 
+typedef struct s_socket
+{
+	struct sockaddr_in	sock_addr;
+	socklen_t			sock_len;
+}t_socket;
+
 typedef struct s_routine_arg {
-	t_nmap	*nmap;
-	t_list	*ports;
-	t_list	*scans;
-	int		port_range;
+	t_nmap				*nmap;
+	t_list				*ports;
+	t_list				*scans;
+	int					port_range;
+	t_socket			*src_addr;
+	t_socket			*dest_addr;
 } t_routine_arg;
 
 typedef struct s_thread_res {
 	t_port	*closed_ports;
 	t_port	*open_ports;
 }t_thread_res;
-
 
 typedef struct s_pseudo_header {
     uint32_t	source_address;
@@ -127,17 +134,6 @@ typedef struct s_pseudo_header {
     uint8_t		protocol;
     uint16_t	tcp_length;
 }t_pseudo_header;
-
-typedef struct s_probe
-{
-	struct ip		ip_header;
-	struct tcphdr	tcp_header;
-} t_probe;
-
-typedef struct sock{
-	struct sockaddr_in	socket;
-	socklen_t			socket_len;
-} t_sock;
 
 typedef struct s_service
 {
@@ -195,17 +191,16 @@ void	scanner(void);
 
 // scans
 int					udp_scan(char *ip, int port);
-void				generate_ip_header(t_probe *probe_request, struct in_addr ip_source, struct in_addr ip_destination);
-void				generate_tcp_header(int port, int scan_type, t_probe *probe_request, struct in_addr ip_source, struct in_addr ip_destination);
-struct sockaddr_in	get_local_address(void);
-t_sock 				get_target_address(const char *target_addr, int port);
+void				generate_ip_header(struct ip *ip_header, struct in_addr ip_source, struct in_addr ip_destination, int protocol);
+void				generate_tcp_header(struct tcphdr *tcp_header, struct in_addr ip_source, struct in_addr ip_destination, int port, int scan_type);
 bool				check_time_out(struct timeval *start_time);
 int					syn_handler(const u_char *packet);
-const u_char		*packet_receive(char *filter_exp);
+const u_char		*packet_receive(const char *filter_exp);
 int					handle_packet(const u_char *packet, int scan);
 void				prob_packet(const char *ip_addr, const int port, const int send_socket, int scan_type);
 char				*build_filter(const char *ip, int port);
-int					tcp_scan(const char *ip_addr, int scan_type, int port, int socketk, int);
+void				send_tcp_packet(t_socket *src_addr, t_socket *dest_addr, const int send_socket, const int port, const int tcp_flag);
+int					tcp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int tcp_flag, int scan_type, int socket, int port);
 int					ack_handler(const u_char *packet);
 int					syn_handler(const u_char *packet);
 int					FNX_handler(const u_char *packet);
@@ -215,14 +210,15 @@ int					get_scan_conclusion(t_scan *scans);
 void				update_conculsion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state);
 
 // ouput
-char	*macro_string_rep(int macro);
-char    *result_formater(int scan, int result);
-void    padding(int space_counter);
-void    print_table(char *title, t_port *data, int scan_counter, t_srv *services);
-void	print_stats(const char *ip, int port_count, t_list *scans, int thread_count);
-void	nmap_print(t_list *nmap_list, int scan_count, t_srv *services);
+char				*macro_string_rep(int macro);
+char    			*result_formater(int scan, int result);
+void    			padding(int space_counter);
+void    			print_table(char *title, t_port *data, int scan_counter, t_srv *services);
+void				print_stats(const char *ip, int port_count, t_list *scans, int thread_count);
+void				nmap_print(t_list *nmap_list, int scan_count, t_srv *services);
 
 // utils
+t_socket			*get_local_addr(void);
 int					generate_random_id(void);
 t_srv				*service_mapper(void);
 double				calculate_scan_time(struct timeval *sending_time);

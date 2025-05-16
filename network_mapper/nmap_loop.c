@@ -15,21 +15,26 @@ void nmap_loop(t_input *nmap_input)
 	t_nmap			*nmap_node;
 	t_list			*nmap_list_node;
 	t_list			*threads;
+	t_srv			*services;
+	t_socket		*src_addr;
+	t_socket		*dest_addr;
 	int				offset;
 	int				step_count;
 	int				remainder;
 	int				scan_counter;
-	t_srv			*services;
 	struct timeval	sending_time;
 
 	nmap = NULL;
 	services = service_mapper();
 	scan_counter = node_counter(nmap_input->scans);
+	src_addr = get_local_addr();
 
 	if (nmap_input->thread_count)
 		counters_setting(&nmap_input->thread_count, &nmap_input->port_count, &step_count, &remainder);
     while(nmap_input->ipaddr)
 	{
+		memcpy(&dest_addr->sock_addr, nmap_input->ipaddr->sock_addr, sizeof(struct sockaddr_in));
+		dest_addr->sock_len = nmap_input->ipaddr->addr_len;
 		if (nmap_input->ipaddr->discovery)
 		{
 			threads = NULL;
@@ -40,7 +45,6 @@ void nmap_loop(t_input *nmap_input)
 			print_stats(nmap_node->ipaddr->ip_addr, nmap_input->port_count, nmap_input->scans, nmap_input->thread_count);
 			if (gettimeofday(&sending_time, NULL) != 0)
 				print_error("Get Time of Day Error");
-			// Without Using Threads
 			if (!nmap_input->thread_count)
 			{
 				// main thread (main Process)
@@ -53,12 +57,15 @@ void nmap_loop(t_input *nmap_input)
 				routine_arg->ports = nmap_input->ports;
 				routine_arg->nmap->closed_ports = NULL;
 				routine_arg->nmap->open_ports = NULL;
+				routine_arg->src_addr = src_addr;
+				routine_arg->dest_addr = dest_addr;
 				t_thread_res	*thread_result = thread_routine(routine_arg);
 				t_nmap			*nmap_list;
 
 				nmap_list = (t_nmap *)nmap_list_node->data;
 				port_add(&nmap_list->closed_ports, thread_result->closed_ports);
 				port_add(&nmap_list->open_ports, thread_result->open_ports);
+				free(routine_arg);
 			}
 			else
 			{
@@ -77,6 +84,8 @@ void nmap_loop(t_input *nmap_input)
 					routine_arg->port_range = step_count + remainder;
 					routine_arg->scans = nmap_input->scans;
 					routine_arg->ports = next_head_ports(nmap_input->ports, offset);
+					routine_arg->src_addr = src_addr;
+					routine_arg->dest_addr = dest_addr;
 					routine_arg->nmap->closed_ports = NULL;
 					routine_arg->nmap->open_ports = NULL;
 	
@@ -103,7 +112,6 @@ void nmap_loop(t_input *nmap_input)
 
 void nmap_print(t_list *nmap_list, int scan_count, t_srv *services)
 {
-	
 	while (nmap_list)
 	{
 		t_nmap *nmap;
