@@ -56,7 +56,6 @@ bool	parse_ip_hostname(char *param, t_input *input)
 	bool			discovery;
 
 	splited = ft_split(param, '.');
-	// need to protect this shit
 	if (ft_isnum(splited[0]))
 	{
 		if (!validate_ipaddr(splited))

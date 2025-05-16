@@ -18,7 +18,6 @@ bool    parse_ip(char   *param, t_input *input)
     }
     discovery = host_discovery(param, (struct sockaddr *)server_addr, sizeof(struct sockaddr));
     add_node(&(input->ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr), discovery);
-
     return true;
 }
 
@@ -127,6 +126,11 @@ bool    parse_ports(char    *param, t_input *input)
                 return (false);
             }
             result = atoi(commas_seperated[i]);
+            if (result == 0)
+            {
+                printf("Ports: Invalid ports value\n");
+                return false;
+            }
             new_port = list_new(&result, sizeof(int));
             list_add(&input->ports, new_port);
         }

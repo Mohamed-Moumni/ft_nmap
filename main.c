@@ -70,6 +70,7 @@ int main(int argc, char **argv)
 		// we skip the option's value and get to the next key
 		i += 2;
 	}
+
 	// checks if the only required field is there
 	if (!ipaddr)
 		print_help();
