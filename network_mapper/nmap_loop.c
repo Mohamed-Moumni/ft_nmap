@@ -93,7 +93,7 @@ void nmap_loop(t_input *nmap_input)
 			}
 			list_add(&nmap, nmap_list_node);
 		}
-		printf("\033[0;32mScanning ip: %s is Finished\033[0m\n", nmap_node->ipaddr->ip_addr);
+		printf("\033[0;32mScanning ip: %s is Finished\033[0m\n", nmap_input->ipaddr->ip_addr);
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}
 	nmap_print(nmap, scan_counter, services);
