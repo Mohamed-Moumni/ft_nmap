@@ -225,5 +225,6 @@ void	nmap_print(t_list *nmap_list, int scan_count, t_srv *services);
 // utils
 int					generate_random_id(void);
 t_srv				*service_mapper(void);
+double				calculate_scan_time(struct timeval *sending_time);
 
 #endif

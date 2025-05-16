@@ -141,3 +141,14 @@ int generate_random_id(void)
     int ranged = MIN + random % (MAX - MIN + 1);
     return random;
 }
+
+double calculate_scan_time(struct timeval *sending_time)
+{
+    struct timeval  receiving_time;
+    double          scan_time;
+
+    if (gettimeofday(&receiving_time, NULL) != 0)
+        print_error("Get Time of Day Error");
+    scan_time = (receiving_time.tv_sec - (*sending_time).tv_sec) + ((receiving_time.tv_usec - (*sending_time).tv_usec)) * 0.000001;
+    return scan_time;
+}

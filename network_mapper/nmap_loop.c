@@ -11,15 +11,16 @@ void counters_setting(int *thread_count, int *port_count, int *step_count, int *
 
 void nmap_loop(t_input *nmap_input)
 {
-    t_list	*nmap;
-	t_nmap	*nmap_node;
-	t_list	*nmap_list_node;
-	t_list	*threads;
-	int		offset;
-	int		step_count;
-	int		remainder;
-	int		scan_counter;
-	t_srv	*services;
+    t_list			*nmap;
+	t_nmap			*nmap_node;
+	t_list			*nmap_list_node;
+	t_list			*threads;
+	int				offset;
+	int				step_count;
+	int				remainder;
+	int				scan_counter;
+	t_srv			*services;
+	struct timeval	sending_time;
 
 	nmap = NULL;
 	services = service_mapper();
@@ -35,8 +36,10 @@ void nmap_loop(t_input *nmap_input)
 			offset = 0;
 			remainder = 0;
 			nmap_node = create_nmap_node(nmap_input->ipaddr);
-			print_stats(nmap_node->ipaddr->ip_addr, nmap_input->port_count, nmap_input->scans, nmap_input->thread_count);
 			nmap_list_node = list_new(nmap_node, sizeof(t_list));
+			print_stats(nmap_node->ipaddr->ip_addr, nmap_input->port_count, nmap_input->scans, nmap_input->thread_count);
+			if (gettimeofday(&sending_time, NULL) != 0)
+				print_error("Get Time of Day Error");
 			// Without Using Threads
 			if (!nmap_input->thread_count)
 			{
@@ -92,6 +95,7 @@ void nmap_loop(t_input *nmap_input)
 			list_add(&nmap, nmap_list_node);
 		}
 		printf("\033[0;32mScanning ip: %s is Finished\033[0m\n", nmap_input->ipaddr->ip_addr);
+		printf("\033[0;33mScan Took %.3f seconds\033[0m\n", calculate_scan_time(&sending_time));
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}
 	nmap_print(nmap, scan_counter, services);
