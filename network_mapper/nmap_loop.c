@@ -29,10 +29,14 @@ void nmap_loop(t_input *nmap_input)
 	scan_counter = node_counter(nmap_input->scans);
 	src_addr = get_local_addr();
 
+
 	if (nmap_input->thread_count)
 		counters_setting(&nmap_input->thread_count, &nmap_input->port_count, &step_count, &remainder);
     while(nmap_input->ipaddr)
 	{
+		dest_addr = malloc(sizeof(struct sockaddr_in));
+		if (!dest_addr)
+			print_error("Destination Address Malloc Error");
 		memcpy(&dest_addr->sock_addr, nmap_input->ipaddr->sock_addr, sizeof(struct sockaddr_in));
 		dest_addr->sock_len = nmap_input->ipaddr->addr_len;
 		if (nmap_input->ipaddr->discovery)
@@ -44,7 +48,7 @@ void nmap_loop(t_input *nmap_input)
 			nmap_list_node = list_new(nmap_node, sizeof(t_list));
 			print_stats(nmap_node->ipaddr->ip_addr, nmap_input->port_count, nmap_input->scans, nmap_input->thread_count);
 			if (gettimeofday(&sending_time, NULL) != 0)
-				print_error("Get Time of Day Error");
+			print_error("Get Time of Day Error");
 			if (!nmap_input->thread_count)
 			{
 				// main thread (main Process)
@@ -61,7 +65,7 @@ void nmap_loop(t_input *nmap_input)
 				routine_arg->dest_addr = dest_addr;
 				t_thread_res	*thread_result = thread_routine(routine_arg);
 				t_nmap			*nmap_list;
-
+				
 				nmap_list = (t_nmap *)nmap_list_node->data;
 				port_add(&nmap_list->closed_ports, thread_result->closed_ports);
 				port_add(&nmap_list->open_ports, thread_result->open_ports);
@@ -73,12 +77,12 @@ void nmap_loop(t_input *nmap_input)
 				for (int i = 0; i < nmap_input->thread_count; i++)
 				{
 					pthread_t *thread;
-	
+					
 					thread = malloc(sizeof(pthread_t));
 					t_list	*thread_node = list_new(thread, sizeof(pthread_t));
 					list_add(&threads, thread_node);
 					t_routine_arg *routine_arg;
-
+					
 					routine_arg = malloc(sizeof(t_routine_arg));
 					routine_arg->nmap = (t_nmap *)nmap_list_node->data;
 					routine_arg->port_range = step_count + remainder;
@@ -88,11 +92,11 @@ void nmap_loop(t_input *nmap_input)
 					routine_arg->dest_addr = dest_addr;
 					routine_arg->nmap->closed_ports = NULL;
 					routine_arg->nmap->open_ports = NULL;
-	
+					
 					// create the thread
 					int error = pthread_create(((pthread_t *)thread_node->data), NULL, thread_routine, routine_arg);
 					if (error != 0)
-						print_error("Pthread Create: %s\n", strerror(error));
+					print_error("Pthread Create: %s\n", strerror(error));
 					remainder = remainder > 0 ? 0 : remainder;
 					offset += step_count;
 					free(thread);

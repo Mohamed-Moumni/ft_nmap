@@ -59,8 +59,7 @@ void    *thread_routine(void* arg)
             switch (scan)
             {
                 case UDP_SCAN:
-                    // Integrate your udp implementation HERE!
-                    // scan_node->state = udp_scan(routine_arg->nmap->ipaddr->ip_addr, port);
+                    scan_node->state = udp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, port, send_socket, UDP_SCAN);
                     is_open = scan_node->state != OPEN ? false : true;
                     break;
                 case NULL_SCAN:

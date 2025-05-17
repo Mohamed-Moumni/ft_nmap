@@ -1,98 +1,86 @@
 #include "../ft_nmap.h"
 
-int	udp_handler(int udp_sockfd)
+void generate_udp_header(struct udphdr *udp_header, struct in_addr ip_source, struct in_addr ip_destination, int port)
 {
-	char buffer[4096];
-	struct sockaddr_in reply_addr;
-	socklen_t len = sizeof(reply_addr);
-	ssize_t bytes_recv = recvfrom(udp_sockfd, buffer, sizeof(buffer), 0, (struct sockaddr *)&reply_addr, &len);
-	if (bytes_recv < 0)
-		return OPEN_FILTERED;
-	return OPEN;
-}
+    t_pseudo_header pseudo_header;
+    char buf[1024] = {0};
+    
+    // Fill in UDP header fields
+    udp_header->uh_sport = htons(generate_random_id());
+    udp_header->uh_dport = htons(port);
+    udp_header->uh_ulen = htons(sizeof(struct udphdr));
+    udp_header->uh_sum = 0;
 
-int	icmp_handler(int icmp_sockfd)
-{
-	char	buffer[4096];
-	struct sockaddr_in reply_addr;
-	socklen_t len = sizeof(reply_addr);
-	ssize_t bytes_recv = recvfrom(icmp_sockfd, buffer, sizeof(buffer), 0, (struct sockaddr *)&reply_addr, &len);
-	if (bytes_recv < 0)
-		return OPEN_FILTERED;
-	struct iphdr   *ip_hdr = (struct iphdr*)buffer;
-	struct icmp_header *icmp_reply = (struct icmp_header *)(buffer + (ip_hdr->ihl * 4));
-	if (icmp_reply->type == 3)
-	{
-		if (icmp_reply->code == 3)
-			return CLOSED;
-
-		return FILTERED;
-	}
-}
-
-void generate_udp_header(struct udphdr *udp, uint16_t src_port, uint16_t dest_port, struct in_addr ip_source, struct in_addr ip_destination) {
-	t_pseudo_header pseudo_header;
-	char buf[2000];
-
-    udp->source = htons(src_port);
-    udp->dest = htons(dest_port);
-    udp->len = htons(8);          // UDP length (header + data)
-
-	pseudo_header.source_address = ip_source.s_addr;
+    pseudo_header.source_address = ip_source.s_addr;
     pseudo_header.dest_address = ip_destination.s_addr;
     pseudo_header.placeholder = 0;
-    pseudo_header.protocol = IPPROTO_UDP;
+    pseudo_header.protocol = IPPROTO_UDP;  // UDP protocol
     pseudo_header.tcp_length = htons(sizeof(struct udphdr));
-
+    
     memcpy(buf, &pseudo_header, sizeof(t_pseudo_header));
-	memcpy(buf + sizeof(t_pseudo_header), udp, sizeof(struct udphdr));
-    udp->check = checksum(buf, sizeof(t_pseudo_header) + sizeof(struct udphdr));
+    memcpy(buf + sizeof(t_pseudo_header), udp_header, sizeof(struct udphdr));
+    
+    udp_header->uh_sum = checksum(buf, sizeof(t_pseudo_header) + sizeof(struct udphdr));
 }
 
-int udp_scan(char *ip, int port, int udp_sockfd)
+int udp_handler(const u_char *packet)
 {
-    struct sockaddr_in	dest_addr;
-    struct timeval  	tv;
-	fd_set				readfds;
-	int					maxfd;
-	int					select_ret;
-	struct ip			ip_header;
-	struct udp			udp_header;
-	struct sockaddr_in source_address = get_local_address();
+    if (packet)
+    {
+        const char *ip_header = packet + 14;
+        struct ip *iph = (struct ip *)ip_header;
+        int ip_header_len = iph->ip_hl * 4;
+        
+        if (iph->ip_p == IPPROTO_UDP)
+			return OPEN;
+        else if (iph->ip_p == IPPROTO_ICMP)
+        {
+            const char *icmp_header = ip_header + ip_header_len;
+            struct icmphdr *icmphdr = (struct icmphdr *)icmp_header;
+            
+            if (icmphdr->type == ICMP_UNREACH)
+            {
+                if (icmphdr->code == 3)
+                {
+                    return CLOSED;
+                }
+                else if (icmphdr->code == 1 || icmphdr->code == 2 || 
+                         icmphdr->code == 9 || icmphdr->code == 10 || 
+                         icmphdr->code == 13)
+                {
+                    return FILTERED;
+                }
+            }
+        }
+    }
+    return OPEN_FILTERED;
+}
+
+void	send_udp_packet(t_socket *src_addr, t_socket *dest_addr, const int send_socket, const int port)
+{
+	char                data[1024] = {0};
+	struct ip		    ip_header;
+    struct udphdr       udp_header;
 
 
-	// Setup to send the udp packet
-	generate_ip_header(&ip_header, source_address.sin_addr, tsock.socket.sin_addr);
-    generate_udp_header(port, scan_type, probe, source_address.sin_addr, tsock.socket.sin_addr);
-    memset(&dest_addr, 0, sizeof(dest_addr));
-    dest_addr.sin_family = AF_INET;
-    dest_addr.sin_port = htons(port);
-    dest_addr.sin_addr.s_addr = inet_addr(ip);
-	ssize_t ret = sendto(udp_sockfd, "", 0, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-	if (ret  < 0)
-	{
-		printf("sendto error: %ld\n", ret);
-		printf("errno: %d\n", errno);
-		exit(1);
-	}
+    generate_ip_header(&ip_header, src_addr->sock_addr.sin_addr, dest_addr->sock_addr.sin_addr, IPPROTO_UDP);
+    generate_udp_header(&udp_header, src_addr->sock_addr.sin_addr, dest_addr->sock_addr.sin_addr, port);
 
-	// Listen for both icmp or udp to receive the response
-	select_ret = select(maxfd + 1, &readfds, NULL, NULL, &tv);
-	if (select_ret == -1)
-	{
-		printf("select failed: %d\n", errno);
-		exit(1);
-	}
-	else if (select_ret == 0)
-		return OPEN_FILTERED;
-	else
-	{
-		// Handle the udp response
-		if (FD_ISSET(udp_sockfd, &readfds))
-			return udp_handler(udp_sockfd);
-		// Handle the icmp response
-		if (FD_ISSET(icmp_sockfd, &readfds))
-			return icmp_handler(icmp_sockfd);
-	}
-	return OPEN;
+    memcpy(data, &ip_header, sizeof(struct ip));
+    memcpy(data + sizeof(struct ip), &udp_header, sizeof(struct tcphdr));
+
+    int send_res = sendto(send_socket, (void *)data, sizeof(struct ip) + sizeof(struct tcphdr), 0, &dest_addr->sock_addr, dest_addr->sock_len);
+    if (send_res < 0)
+        print_error("sendto error: %s", strerror(send_res));
+}
+
+int		udp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int port, int socket, int scan_type)
+{
+    const u_char    *packet;
+    int             scan_res;
+
+    send_udp_packet(src_addr, dest_addr, socket, port);
+    packet = packet_receive(filter);
+    scan_res = handle_packet(packet, scan_type);
+    return scan_res;
 }

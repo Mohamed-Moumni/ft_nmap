@@ -19,6 +19,7 @@
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/tcp.h>
+#include <netinet/udp.h>
 #include <time.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -26,6 +27,7 @@
 #include <math.h>
 #include <pthread.h>
 #include <pcap.h>
+#include <assert.h>
 
 #define MIN 25000
 #define MAX 65000
@@ -189,8 +191,10 @@ t_port	*create_port(int port_nb);
 t_nmap	*create_nmap(t_ipaddr *ipaddr);
 void	scanner(void);
 
+// scan handlers
+int udp_handler(const u_char *packet);
+
 // scans
-int					udp_scan(char *ip, int port);
 void				generate_ip_header(struct ip *ip_header, struct in_addr ip_source, struct in_addr ip_destination, int protocol);
 void				generate_tcp_header(struct tcphdr *tcp_header, struct in_addr ip_source, struct in_addr ip_destination, int port, int scan_type);
 bool				check_time_out(struct timeval *start_time);
@@ -208,7 +212,8 @@ void				scan_add(t_scan **scans, t_scan *new_scan);
 void				port_add(t_port **ports, t_port *new_port);
 int					get_scan_conclusion(t_scan *scans);
 void				update_conculsion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state);
-
+void				send_udp_packet(t_socket *src_addr, t_socket *dest_addr, const int send_socket, const int port);
+int					udp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int port, int socket, int scan_type);
 // ouput
 char				*macro_string_rep(int macro);
 char    			*result_formater(int scan, int result);

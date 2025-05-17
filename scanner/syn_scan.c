@@ -115,7 +115,8 @@ int handle_packet(const u_char *packet, int scan)
         return FNX_handler(packet);
     case FIN_SCAN:
         return FNX_handler(packet);
-    // Integrate your UDP Handler
+    case UDP_SCAN:
+        return udp_handler(packet);
     default:
         return -1;
     }
