@@ -100,7 +100,7 @@ void nmap_loop(t_input *nmap_input)
 					if (error != 0)
 						print_error("Pthread Create: %s\n", strerror(error));
 					remainder = remainder > 0 ? 0 : remainder;
-					offset += step_count;
+					offset += routine_arg->port_range;
 					free(thread);
 				}
 				join_threads(threads, (t_nmap **)&nmap_list_node->data);

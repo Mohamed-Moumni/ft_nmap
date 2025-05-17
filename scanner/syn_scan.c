@@ -48,7 +48,7 @@ bool check_time_out(struct timeval *start_time)
     struct timeval  current_time;
 
     gettimeofday(&current_time, NULL);
-    if (current_time.tv_sec - start_time->tv_sec >= 3)
+    if (current_time.tv_sec - start_time->tv_sec >= 4)
         return true;
     return false;
 }
