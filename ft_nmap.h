@@ -27,7 +27,6 @@
 #include <math.h>
 #include <pthread.h>
 #include <pcap.h>
-#include <assert.h>
 
 #define MIN 25000
 #define MAX 65000

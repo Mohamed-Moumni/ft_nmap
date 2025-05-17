@@ -2,7 +2,9 @@
 
 void counters_setting(int *thread_count, int *port_count, int *step_count, int *remainder)
 {
+	*remainder = 0;
 	*step_count = *port_count <= *thread_count ? 1 : *port_count / *thread_count;
+
 	if (*port_count <= *thread_count)
 		*thread_count = *port_count;
 	if (*port_count > *thread_count)
@@ -29,26 +31,26 @@ void nmap_loop(t_input *nmap_input)
 	scan_counter = node_counter(nmap_input->scans);
 	src_addr = get_local_addr();
 
-
-	if (nmap_input->thread_count)
-		counters_setting(&nmap_input->thread_count, &nmap_input->port_count, &step_count, &remainder);
     while(nmap_input->ipaddr)
 	{
 		dest_addr = malloc(sizeof(struct sockaddr_in));
 		if (!dest_addr)
-			print_error("Destination Address Malloc Error");
+		print_error("Destination Address Malloc Error");
 		memcpy(&dest_addr->sock_addr, nmap_input->ipaddr->sock_addr, sizeof(struct sockaddr_in));
 		dest_addr->sock_len = nmap_input->ipaddr->addr_len;
 		if (nmap_input->ipaddr->discovery)
 		{
 			threads = NULL;
 			offset = 0;
-			remainder = 0;
 			nmap_node = create_nmap_node(nmap_input->ipaddr);
 			nmap_list_node = list_new(nmap_node, sizeof(t_list));
+			if (nmap_input->thread_count)
+				counters_setting(&nmap_input->thread_count, &nmap_input->port_count, &step_count, &remainder);
+
 			print_stats(nmap_node->ipaddr->ip_addr, nmap_input->port_count, nmap_input->scans, nmap_input->thread_count);
+
 			if (gettimeofday(&sending_time, NULL) != 0)
-			print_error("Get Time of Day Error");
+				print_error("Get Time of Day Error");
 			if (!nmap_input->thread_count)
 			{
 				// main thread (main Process)
@@ -82,7 +84,7 @@ void nmap_loop(t_input *nmap_input)
 					t_list	*thread_node = list_new(thread, sizeof(pthread_t));
 					list_add(&threads, thread_node);
 					t_routine_arg *routine_arg;
-					
+
 					routine_arg = malloc(sizeof(t_routine_arg));
 					routine_arg->nmap = (t_nmap *)nmap_list_node->data;
 					routine_arg->port_range = step_count + remainder;
@@ -96,7 +98,7 @@ void nmap_loop(t_input *nmap_input)
 					// create the thread
 					int error = pthread_create(((pthread_t *)thread_node->data), NULL, thread_routine, routine_arg);
 					if (error != 0)
-					print_error("Pthread Create: %s\n", strerror(error));
+						print_error("Pthread Create: %s\n", strerror(error));
 					remainder = remainder > 0 ? 0 : remainder;
 					offset += step_count;
 					free(thread);
@@ -109,6 +111,7 @@ void nmap_loop(t_input *nmap_input)
 		}
 		printf("\033[0;32mScanning ip: %s is Finished\033[0m\n", nmap_input->ipaddr->ip_addr);
 		printf("\033[0;33mScan Took %.3f seconds\033[0m\n", calculate_scan_time(&sending_time));
+		free(dest_addr);
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}
 	nmap_print(nmap, scan_counter, services);
