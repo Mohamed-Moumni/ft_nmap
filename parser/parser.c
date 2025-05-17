@@ -2,22 +2,11 @@
 
 bool    parse_ip(char   *param, t_input *input)
 {
-    char **splited = ft_split(param, '.');
-    bool    discovery;
-    if (!validate_ipaddr(splited))
+    if (!parse_ip_hostname(param, input))
     {
-        printf("ip: Invalid IP address\n");
-        return (false);
-    }
-    struct sockaddr_in *server_addr = malloc(sizeof(struct sockadd_in *));
-    server_addr->sin_family = AF_INET;
-    if (inet_pton(AF_INET, param, &server_addr->sin_addr) <= 0)
-    {
-        fprintf(stderr, "error number %i inet_pton\n", errno);
+        printf("ip: Invalid IPv4/hostname\n");
         return false;
-    }
-    discovery = host_discovery(param, (struct sockaddr *)server_addr, sizeof(struct sockaddr));
-    add_node(&(input->ipaddr), strdup(param), (struct sockaddr *)server_addr, sizeof(struct sockaddr), discovery);
+    } 
     return true;
 }
 
