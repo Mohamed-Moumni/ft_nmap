@@ -152,3 +152,41 @@ double calculate_scan_time(struct timeval *sending_time)
     scan_time = (receiving_time.tv_sec - (*sending_time).tv_sec) + ((receiving_time.tv_usec - (*sending_time).tv_usec)) * 0.000001;
     return scan_time;
 }
+
+t_socket    *get_local_addr(void)
+{
+    int                 sock;
+    t_socket            *local_addr;
+    struct sockaddr_in  dummy_dest;
+
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0)
+        print_error("Socket Error at get_local_addr(): %s", strerror(sock));
+
+    local_addr = malloc(sizeof(t_socket));
+    if (!local_addr)
+        print_error("Malloc Error at get_local_addr()");
+
+    memset(&dummy_dest, 0, sizeof(dummy_dest));
+    dummy_dest.sin_family = AF_INET;
+    dummy_dest.sin_port = htons(53);
+    inet_pton(AF_INET, "8.8.8.8", &dummy_dest.sin_addr);
+
+    if (connect(sock, (struct sockaddr *)&dummy_dest, sizeof(dummy_dest)) < 0)
+        print_error("Connect Error: ");
+
+    if (getsockname(sock, (struct sockaddr *)&local_addr->sock_addr, &local_addr->sock_len) < 0)
+        print_error("GetSockName Error: at get_local_addr()");
+    close(sock);
+    return local_addr;
+}
+
+char *build_filter(const char *ip, int port)
+{
+    size_t  buf_size = 10 + strlen(ip) + 15 + 6;
+    char    *filter = malloc(buf_size);
+    if (!filter)
+        print_error("Malloc Error\n");
+    snprintf(filter, buf_size, "src host %s and src port %d", ip, port);
+    return filter;
+}
