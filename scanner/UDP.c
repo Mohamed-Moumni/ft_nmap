@@ -30,38 +30,40 @@ int	icmp_handler(int icmp_sockfd)
 	}
 }
 
-int udp_scan(char *ip, int port)
+void generate_udp_header(struct udphdr *udp, uint16_t src_port, uint16_t dest_port, struct in_addr ip_source, struct in_addr ip_destination) {
+	t_pseudo_header pseudo_header;
+	char buf[2000];
+
+    udp->source = htons(src_port);
+    udp->dest = htons(dest_port);
+    udp->len = htons(8);          // UDP length (header + data)
+
+	pseudo_header.source_address = ip_source.s_addr;
+    pseudo_header.dest_address = ip_destination.s_addr;
+    pseudo_header.placeholder = 0;
+    pseudo_header.protocol = IPPROTO_UDP;
+    pseudo_header.tcp_length = htons(sizeof(struct udphdr));
+
+    memcpy(buf, &pseudo_header, sizeof(t_pseudo_header));
+	memcpy(buf + sizeof(t_pseudo_header), udp, sizeof(struct udphdr));
+    udp->check = checksum(buf, sizeof(t_pseudo_header) + sizeof(struct udphdr));
+}
+
+int udp_scan(char *ip, int port, int udp_sockfd)
 {
-	double      		timer;
-	int					udp_sockfd;
-	int					icmp_sockfd;
     struct sockaddr_in	dest_addr;
     struct timeval  	tv;
 	fd_set				readfds;
 	int					maxfd;
 	int					select_ret;
+	struct ip			ip_header;
+	struct udp			udp_header;
+	struct sockaddr_in source_address = get_local_address();
 
-	// Socket prepration both icmp and udp socket
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
-	FD_ZERO(&readfds);
-	udp_sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (udp_sockfd < 0)
-	{
-		printf("socket error %d\n", udp_sockfd);
-		exit(1);
-	}
-	FD_SET(udp_sockfd, &readfds);
-	icmp_sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-	if (icmp_sockfd < 0)
-	{
-		printf("socket error %d\n", icmp_sockfd);
-		exit(1);
-	}
-	FD_SET(icmp_sockfd, &readfds);
-	maxfd = udp_sockfd > icmp_sockfd ? udp_sockfd : icmp_sockfd;
 
 	// Setup to send the udp packet
+	generate_ip_header(&ip_header, source_address.sin_addr, tsock.socket.sin_addr);
+    generate_udp_header(port, scan_type, probe, source_address.sin_addr, tsock.socket.sin_addr);
     memset(&dest_addr, 0, sizeof(dest_addr));
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(port);
