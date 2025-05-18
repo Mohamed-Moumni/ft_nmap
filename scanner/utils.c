@@ -168,7 +168,7 @@ t_socket    get_local_addr(void)
 
     memset(&dummy_dest, 0, sizeof(dummy_dest));
     dummy_dest.sin_family = AF_INET;
-    dummy_dest.sin_port = htons(53);
+    // dummy_dest.sin_port = htons(53);
     inet_pton(AF_INET, "8.8.8.8", &dummy_dest.sin_addr);
 
     if (connect(sock, (struct sockaddr *)&dummy_dest, sizeof(dummy_dest)) < 0)

@@ -27,6 +27,7 @@
 #include <math.h>
 #include <pthread.h>
 #include <pcap.h>
+#include <netdb.h>
 
 #define MIN 25000
 #define MAX 65000
@@ -137,12 +138,6 @@ typedef struct s_pseudo_header {
     uint16_t	tcp_length;
 }t_pseudo_header;
 
-typedef struct s_service
-{
-	char	*tcp_srv;
-	char	*udp_srv;
-} t_srv;
-
 extern t_connect connection;
 
 bool    parse_ip(char   *param, t_input *input);
@@ -164,6 +159,7 @@ bool			perform_scan(t_input *input, t_ipaddr *ipaddr, int scan);
 void			print_error(const char *format, ...);
 unsigned short	checksum(void *b, int len);
 t_list			*return_all_scans(void);
+t_list			*return_default_ports(void);
 
 // list methods
 t_list	*list_new(void *data, size_t data_size);
@@ -218,14 +214,13 @@ int					udp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, in
 char				*macro_string_rep(int macro);
 char    			*result_formater(int scan, int result);
 void    			padding(int space_counter);
-void    			print_table(char *title, t_port *data, int scan_counter, t_srv *services);
+void    			print_table(char *title, t_port *data, int scan_counter);
 void				print_stats(const char *ip, int port_count, t_list *scans, int thread_count);
-void				nmap_print(t_list *nmap_list, int scan_count, t_srv *services);
+void				nmap_print(t_list *nmap_list, int scan_count);
 
 // utils
 t_socket			get_local_addr(void);
 int					generate_random_id(void);
-t_srv				*service_mapper(void);
 double				calculate_scan_time(struct timeval *sending_time);
 
 #endif

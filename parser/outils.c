@@ -57,3 +57,16 @@ t_list	*return_all_scans(void)
 	list_add(&to_return, list_new(&udp, sizeof(int)));
 	return to_return;
 }
+
+t_list	*return_default_ports(void)
+{
+	t_list *to_return = NULL;
+	int port = 1;
+
+	while (port <= 1024)
+	{
+		list_add(&to_return, list_new(&port, sizeof(int)));
+		port++;
+	}
+	return to_return;
+}

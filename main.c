@@ -76,6 +76,11 @@ int main(int argc, char **argv)
 		print_help();
 	if (!input.scans)
 		input.scans = return_all_scans();
+	if (!input.ports)
+	{
+		input.ports = return_default_ports();
+		input.port_count = node_counter(input.ports);
+	}
 	nmap_loop(&input);
 	return 0;
 }

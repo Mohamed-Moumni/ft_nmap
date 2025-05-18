@@ -17,7 +17,6 @@ void nmap_loop(t_input *nmap_input)
 	t_nmap			*nmap_node;
 	t_list			*nmap_list_node;
 	t_list			*threads;
-	t_srv			*services;
 	t_socket		src_addr;
 	t_socket		*dest_addr;
 	int				offset;
@@ -27,7 +26,6 @@ void nmap_loop(t_input *nmap_input)
 	struct timeval	sending_time;
 
 	nmap = NULL;
-	services = service_mapper();
 	scan_counter = node_counter(nmap_input->scans);
 	src_addr = get_local_addr();
 
@@ -114,21 +112,6 @@ void nmap_loop(t_input *nmap_input)
 		free(dest_addr);
 		nmap_input->ipaddr = nmap_input->ipaddr->next;
 	}
-	nmap_print(nmap, scan_counter, services);
+	nmap_print(nmap, scan_counter);
 }
 
-void nmap_print(t_list *nmap_list, int scan_count, t_srv *services)
-{
-	while (nmap_list)
-	{
-		t_nmap *nmap;
-
-		nmap = (t_nmap *)nmap_list->data;
-		printf("\033[0;32mScanning Results for %s:\033[0m\n", nmap->ipaddr->ip_addr);
-		if (nmap->open_ports)
-			print_table("Open Ports", nmap->open_ports, scan_count, services);
-		if (nmap->closed_ports)
-			print_table("Closed/Filtered/Unfiltered ports:", nmap->closed_ports, scan_count, services);
-		nmap_list = nmap_list->next;
-	}
-}

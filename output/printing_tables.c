@@ -69,11 +69,12 @@ void    padding(int space_counter)
     printf(" | ");
 }
 
-void    print_table(char *title, t_port *data, int scan_counter, t_srv *services)
+void    print_table(char *title, t_port *data, int scan_counter)
 {
-    char    *result;
-    char    *svc_name;
-    char    *conclusion;
+    char            *result;
+    char            *svc_name;
+    char            *conclusion;
+    struct servent  *serv;
 
     printf("%s:\n", title);
     printf("%-10s | %-30s | %-30s | %-10s\n", "Port", "Service Name (if applicable)", "Results", "Conclusion");
@@ -81,7 +82,11 @@ void    print_table(char *title, t_port *data, int scan_counter, t_srv *services
     while (data)
     {
         result = result_formater(data->scans->type, data->scans->state);
-        svc_name = services[data->port_number - 1].tcp_srv;
+        serv = getservbyport(htons(data->port_number), "tcp");
+        if (!serv)
+            svc_name = "Unassigned";
+        else
+            svc_name = serv->s_name;
         conclusion = macro_string_rep(data->category);
         printf("%-10d | %-30s | %-30s | %-10s\n", data->port_number, svc_name, result, conclusion);
         if (scan_counter > 1)
@@ -118,4 +123,20 @@ void print_stats(const char *ip, int port_count, t_list *scans, int thread_count
     }
     printf("\nNo of threads: %d\n", thread_count);
     printf("Scanning...\n");
+}
+
+void nmap_print(t_list *nmap_list, int scan_count)
+{
+	while (nmap_list)
+	{
+		t_nmap *nmap;
+
+		nmap = (t_nmap *)nmap_list->data;
+		printf("\033[0;32mScanning Results for %s:\033[0m\n", nmap->ipaddr->ip_addr);
+		if (nmap->open_ports)
+			print_table("Open Ports", nmap->open_ports, scan_count);
+		if (nmap->closed_ports)
+			print_table("Closed/Filtered/Unfiltered ports:", nmap->closed_ports, scan_count);
+		nmap_list = nmap_list->next;
+	}
 }
