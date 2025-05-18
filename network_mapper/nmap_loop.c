@@ -18,7 +18,7 @@ void nmap_loop(t_input *nmap_input)
 	t_list			*nmap_list_node;
 	t_list			*threads;
 	t_srv			*services;
-	t_socket		*src_addr;
+	t_socket		src_addr;
 	t_socket		*dest_addr;
 	int				offset;
 	int				step_count;
@@ -63,7 +63,7 @@ void nmap_loop(t_input *nmap_input)
 				routine_arg->ports = nmap_input->ports;
 				routine_arg->nmap->closed_ports = NULL;
 				routine_arg->nmap->open_ports = NULL;
-				routine_arg->src_addr = src_addr;
+				routine_arg->src_addr = &src_addr;
 				routine_arg->dest_addr = dest_addr;
 				t_thread_res	*thread_result = thread_routine(routine_arg);
 				t_nmap			*nmap_list;
@@ -90,7 +90,7 @@ void nmap_loop(t_input *nmap_input)
 					routine_arg->port_range = step_count + remainder;
 					routine_arg->scans = nmap_input->scans;
 					routine_arg->ports = next_head_ports(nmap_input->ports, offset);
-					routine_arg->src_addr = src_addr;
+					routine_arg->src_addr = &src_addr;
 					routine_arg->dest_addr = dest_addr;
 					routine_arg->nmap->closed_ports = NULL;
 					routine_arg->nmap->open_ports = NULL;

@@ -30,6 +30,7 @@
 
 #define MIN 25000
 #define MAX 65000
+#define MAX_SRV_PORTS 65532
 
 #define	ALL_SCAN  -1
 #define	SYN_SCAN  0
@@ -222,7 +223,7 @@ void				print_stats(const char *ip, int port_count, t_list *scans, int thread_co
 void				nmap_print(t_list *nmap_list, int scan_count, t_srv *services);
 
 // utils
-t_socket			*get_local_addr(void);
+t_socket			get_local_addr(void);
 int					generate_random_id(void);
 t_srv				*service_mapper(void);
 double				calculate_scan_time(struct timeval *sending_time);

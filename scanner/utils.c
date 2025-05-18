@@ -139,7 +139,7 @@ int generate_random_id(void)
     gettimeofday(&curr_time, NULL);
     random = rand_r((unsigned int *)&curr_time.tv_sec) / 10000;
     int ranged = MIN + random % (MAX - MIN + 1);
-    return random;
+    return ranged;
 }
 
 double calculate_scan_time(struct timeval *sending_time)
@@ -153,19 +153,18 @@ double calculate_scan_time(struct timeval *sending_time)
     return scan_time;
 }
 
-t_socket    *get_local_addr(void)
+t_socket    get_local_addr(void)
 {
     int                 sock;
-    t_socket            *local_addr;
+    t_socket            local_t_socket;
+    struct sockaddr_in  local_addr;
+    socklen_t           addr_len;
     struct sockaddr_in  dummy_dest;
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
         print_error("Socket Error at get_local_addr(): %s", strerror(sock));
 
-    local_addr = malloc(sizeof(t_socket));
-    if (!local_addr)
-        print_error("Malloc Error at get_local_addr()");
 
     memset(&dummy_dest, 0, sizeof(dummy_dest));
     dummy_dest.sin_family = AF_INET;
@@ -175,10 +174,13 @@ t_socket    *get_local_addr(void)
     if (connect(sock, (struct sockaddr *)&dummy_dest, sizeof(dummy_dest)) < 0)
         print_error("Connect Error: ");
 
-    if (getsockname(sock, (struct sockaddr *)&local_addr->sock_addr, &local_addr->sock_len) < 0)
-        print_error("GetSockName Error: at get_local_addr()");
+    int getsock = getsockname(sock, (struct sockaddr *)&local_addr, &addr_len);
+    if (getsock < 0)
+        print_error("GetSockName Error: at get_local_addr() %s,", strerror(getsock));
+    local_t_socket.sock_addr = local_addr;
+    local_t_socket.sock_len = addr_len;
     close(sock);
-    return local_addr;
+    return local_t_socket;
 }
 
 char *build_filter(const char *ip, int port)

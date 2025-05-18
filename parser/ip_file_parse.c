@@ -17,12 +17,8 @@ bool	validate_hostname(char *param, t_input *input)
 	struct addrinfo	hints;
 	struct addrinfo	*res;
 	int				ret;
-	int				sockfd;
-	struct timeval	timeout;
 	bool			discovery;
 
-	timeout.tv_sec = 1;
-	timeout.tv_usec = 0;
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_RAW;

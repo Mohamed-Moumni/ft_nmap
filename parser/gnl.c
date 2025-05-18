@@ -18,8 +18,6 @@ char *ft_strdup(char *s)
 
 char *get_next_line(int fd)
 {
-    static char    *buffer_reminder;
-    buffer_reminder = 0;
     if (fd < 0)
         return (NULL);
     char buff[1];

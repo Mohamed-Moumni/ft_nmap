@@ -5,7 +5,10 @@ void generate_ip_header(struct ip *ip_header, struct in_addr ip_source, struct i
     ip_header->ip_v = 4;
     ip_header->ip_hl = 5;
     ip_header->ip_tos = 0;
-    ip_header->ip_len = htons(sizeof(struct ip) + sizeof(struct tcphdr));
+    if (protocol == IPPROTO_TCP)
+        ip_header->ip_len = htons(sizeof(struct ip) + sizeof(struct tcphdr));
+    else
+        ip_header->ip_len = htons(sizeof(struct ip) + sizeof(struct udphdr));
     ip_header->ip_id = htons(generate_random_id());
     ip_header->ip_off = htons(0);
     ip_header->ip_ttl = TTL;
@@ -64,7 +67,6 @@ const u_char *packet_receive(const char *filter_exp)
     struct bpf_program  fp;
     struct timeval      start_time;
     bpf_u_int32         net = 0;
-    bpf_u_int32         mask = 0;
 
     if (pcap_findalldevs(&alldevs, errbuf) == -1)
         print_error("Error finding devices: %s\n", errbuf);
@@ -122,12 +124,12 @@ int handle_packet(const u_char *packet, int scan)
     }
 }
 
+
 void send_tcp_packet(t_socket *src_addr, t_socket *dest_addr, const int send_socket, const int port, const int tcp_flag)
 {
     char                data[1024] = {0};
 	struct ip		    ip_header;
     struct tcphdr       tcp_header;
-
 
     generate_ip_header(&ip_header, src_addr->sock_addr.sin_addr, dest_addr->sock_addr.sin_addr, IPPROTO_TCP);
     generate_tcp_header(&tcp_header, src_addr->sock_addr.sin_addr, dest_addr->sock_addr.sin_addr, port, tcp_flag);

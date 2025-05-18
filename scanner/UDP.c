@@ -27,7 +27,7 @@ int udp_handler(const u_char *packet)
 {
     if (packet)
     {
-        const char *ip_header = packet + 14;
+        const char *ip_header = (char *)packet + 14;
         struct ip *iph = (struct ip *)ip_header;
         int ip_header_len = iph->ip_hl * 4;
         

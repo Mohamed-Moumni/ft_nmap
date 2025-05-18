@@ -36,7 +36,6 @@ void    *thread_routine(void* arg)
 
     
     routine_arg = (t_routine_arg *)arg;
-    // printf("PORT RANGE: %d\n", routine_arg->port_range);
     thread_result = malloc(sizeof(t_thread_res));
     if (!thread_result)
         print_error("Malloc Error: Thread Result");
@@ -51,7 +50,7 @@ void    *thread_routine(void* arg)
         t_port  *port_node = create_port(port);
         t_scan  *scans = NULL;
         t_list  *scans_temp = routine_arg->scans;
-        char    *filter = build_filter(routine_arg->nmap->ipaddr->ip_addr, port);
+        filter = build_filter(routine_arg->nmap->ipaddr->ip_addr, port);
         is_open = false;
 
         while (scans_temp)

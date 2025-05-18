@@ -36,7 +36,6 @@ unsigned short checksum(void *b, int len)
 int send_recv(char *packet, t_icmp_header *icmp_header, char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len)
 {
 	// long long   start_time;
-	double      timer;
 	char        buffer[4096];
 	int			sockfd;
 
