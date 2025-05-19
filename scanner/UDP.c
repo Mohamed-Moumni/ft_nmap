@@ -63,24 +63,31 @@ void	send_udp_packet(t_socket *src_addr, t_socket *dest_addr, const int send_soc
     struct udphdr       udp_header;
 
 
-    generate_ip_header(&ip_header, src_addr->sock_addr.sin_addr, dest_addr->sock_addr.sin_addr, IPPROTO_UDP);
-    generate_udp_header(&udp_header, src_addr->sock_addr.sin_addr, dest_addr->sock_addr.sin_addr, port);
+    generate_ip_header(&ip_header, &src_addr->sock_addr->sin_addr, &dest_addr->sock_addr->sin_addr, IPPROTO_UDP);
+    generate_udp_header(&udp_header, src_addr->sock_addr->sin_addr, dest_addr->sock_addr->sin_addr, port);
 
     memcpy(data, &ip_header, sizeof(struct ip));
-    memcpy(data + sizeof(struct ip), &udp_header, sizeof(struct tcphdr));
+    memcpy(data + sizeof(struct ip), &udp_header, sizeof(struct udphdr));
 
-    int send_res = sendto(send_socket, (void *)data, sizeof(struct ip) + sizeof(struct tcphdr), 0, &dest_addr->sock_addr, dest_addr->sock_len);
+    int send_res = sendto(send_socket, (void *)data, sizeof(struct ip) + sizeof(struct udphdr), 0, dest_addr->sock_addr, dest_addr->sock_len);
     if (send_res < 0)
         print_error("sendto error: %s", strerror(send_res));
 }
 
-int		udp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int port, int socket, int scan_type)
+int		udp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int port, int socket, int scan_type, pcap_t *handle)
 {
     const u_char    *packet;
     int             scan_res;
+    struct bpf_program  fp;
+    bpf_u_int32         net = 0;
+
+    if (pcap_compile(handle, &fp, filter, 0, net) == -1)
+        print_error("Couldn't parse filter %s: %s\n", filter, pcap_geterr(handle));
+    if (pcap_setfilter(handle, &fp) == -1)
+        print_error("Couldn't install filter %s: %s\n", filter, pcap_geterr(handle));
 
     send_udp_packet(src_addr, dest_addr, socket, port);
-    packet = packet_receive(filter);
+    packet = packet_receive(handle);
     scan_res = handle_packet(packet, scan_type);
     return scan_res;
 }

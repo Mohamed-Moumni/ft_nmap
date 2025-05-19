@@ -77,6 +77,7 @@ typedef struct s_connect {
 	int             sockfd;
 	struct sockaddr *sock_addr;
 	socklen_t       addr_len;
+	pcap_t			*handle;
 }   t_connect;
 
 typedef struct icmp_header {
@@ -112,9 +113,9 @@ typedef struct s_nmap
 
 typedef struct s_socket
 {
-	struct sockaddr_in	sock_addr;
+	struct sockaddr_in	*sock_addr;
 	socklen_t			sock_len;
-}t_socket;
+}	t_socket;
 
 typedef struct s_routine_arg {
 	t_nmap				*nmap;
@@ -123,12 +124,12 @@ typedef struct s_routine_arg {
 	int					port_range;
 	t_socket			*src_addr;
 	t_socket			*dest_addr;
-} t_routine_arg;
+}	t_routine_arg;
 
 typedef struct s_thread_res {
 	t_port	*closed_ports;
 	t_port	*open_ports;
-}t_thread_res;
+}	t_thread_res;
 
 typedef struct s_pseudo_header {
     uint32_t	source_address;
@@ -136,7 +137,7 @@ typedef struct s_pseudo_header {
     uint8_t		placeholder;
     uint8_t		protocol;
     uint16_t	tcp_length;
-}t_pseudo_header;
+}	t_pseudo_header;
 
 extern t_connect connection;
 
@@ -191,16 +192,15 @@ void	scanner(void);
 int udp_handler(const u_char *packet);
 
 // scans
-void				generate_ip_header(struct ip *ip_header, struct in_addr ip_source, struct in_addr ip_destination, int protocol);
-void				generate_tcp_header(struct tcphdr *tcp_header, struct in_addr ip_source, struct in_addr ip_destination, int port, int scan_type);
+void				generate_ip_header(struct ip *ip_header, struct in_addr *ip_source, struct in_addr *ip_destination, int protocol);
 bool				check_time_out(struct timeval *start_time);
 int					syn_handler(const u_char *packet);
-const u_char		*packet_receive(const char *filter_exp);
+const u_char		*packet_receive(pcap_t *handle);
 int					handle_packet(const u_char *packet, int scan);
 void				prob_packet(const char *ip_addr, const int port, const int send_socket, int scan_type);
 char				*build_filter(const char *ip, int port);
 void				send_tcp_packet(t_socket *src_addr, t_socket *dest_addr, const int send_socket, const int port, const int tcp_flag);
-int					tcp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int tcp_flag, int scan_type, int socket, int port);
+int					tcp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int tcp_flag, int scan_type, int socket, int port, pcap_t *);
 int					ack_handler(const u_char *packet);
 int					syn_handler(const u_char *packet);
 int					FNX_handler(const u_char *packet);
@@ -209,7 +209,8 @@ void				port_add(t_port **ports, t_port *new_port);
 int					get_scan_conclusion(t_scan *scans);
 void				update_conculsion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state);
 void				send_udp_packet(t_socket *src_addr, t_socket *dest_addr, const int send_socket, const int port);
-int					udp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int port, int socket, int scan_type);
+int					udp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int port, int socket, int scan_type, pcap_t *);
+pcap_t				*return_pcap_handle();
 // ouput
 char				*macro_string_rep(int macro);
 char    			*result_formater(int scan, int result);
@@ -219,8 +220,17 @@ void				print_stats(const char *ip, int port_count, t_list *scans, int thread_co
 void				nmap_print(t_list *nmap_list, int scan_count);
 
 // utils
-t_socket			get_local_addr(void);
+t_socket			*get_local_addr(void);
 int					generate_random_id(void);
 double				calculate_scan_time(struct timeval *sending_time);
+
+typedef struct {
+    struct timeval start;
+    struct timeval end;
+} Timer;
+
+void timer_start(Timer *t);
+void timer_stop(Timer *t);
+void timer_print_elapsed(Timer *t, const char *label, int port);
 
 #endif

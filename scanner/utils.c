@@ -153,14 +153,15 @@ double calculate_scan_time(struct timeval *sending_time)
     return scan_time;
 }
 
-t_socket    get_local_addr(void)
+t_socket    *get_local_addr(void)
 {
     int                 sock;
-    t_socket            local_t_socket;
-    struct sockaddr_in  local_addr;
+    t_socket            *local_t_socket;
     socklen_t           addr_len;
     struct sockaddr_in  dummy_dest;
 
+    local_t_socket = malloc(sizeof(t_socket));
+    local_t_socket->sock_addr = malloc(sizeof(struct sockaddr_in));
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
         print_error("Socket Error at get_local_addr(): %s", strerror(sock));
@@ -174,11 +175,10 @@ t_socket    get_local_addr(void)
     if (connect(sock, (struct sockaddr *)&dummy_dest, sizeof(dummy_dest)) < 0)
         print_error("Connect Error: ");
 
-    int getsock = getsockname(sock, (struct sockaddr *)&local_addr, &addr_len);
+    int getsock = getsockname(sock, local_t_socket->sock_addr, &addr_len);
     if (getsock < 0)
         print_error("GetSockName Error: at get_local_addr() %s,", strerror(getsock));
-    local_t_socket.sock_addr = local_addr;
-    local_t_socket.sock_len = addr_len;
+    local_t_socket->sock_len = addr_len;
     close(sock);
     return local_t_socket;
 }
@@ -191,4 +191,50 @@ char *build_filter(const char *ip, int port)
         print_error("Malloc Error\n");
     snprintf(filter, buf_size, "src host %s and src port %d", ip, port);
     return filter;
+}
+
+pcap_t *return_pcap_handle()
+{
+    char            errbuf[PCAP_ERRBUF_SIZE];
+    pcap_if_t           *alldevs;
+    pcap_if_t           *dev;
+    pcap_t              *handle;
+
+    if (pcap_findalldevs(&alldevs, errbuf) == -1)
+        print_error("Error finding devices: %s\n", errbuf);
+
+    if (alldevs == NULL)
+        print_error("No devices found\n");
+        
+    dev = alldevs;
+    if (dev->name == NULL)
+        print_error("First device has no name\n");
+        
+    handle = pcap_open_live(dev->name, 65535, 1, 100, errbuf);
+
+    if (pcap_set_buffer_size(handle, 1024 * 1024) == -1)
+        print_error("Error setting buffer size: %s\n", pcap_geterr(handle));
+        
+    if (pcap_setnonblock(handle, 1, errbuf) == -1)
+        print_error("Error setting non-blocking mode: %s\n", errbuf);
+
+    pcap_freealldevs(alldevs);
+    if (handle == NULL)
+        print_error("Couldn't open device %s: %s\n", dev->name, errbuf);
+    return handle;
+}
+
+void timer_start(Timer *t) {
+    gettimeofday(&t->start, NULL);
+}
+
+void timer_stop(Timer *t) {
+    gettimeofday(&t->end, NULL);
+}
+
+void timer_print_elapsed(Timer *t, const char *label, int port) {
+    long seconds = t->end.tv_sec - t->start.tv_sec;
+    long microseconds = t->end.tv_usec - t->start.tv_usec;
+    double elapsed = seconds * 1000.0 + microseconds / 1000.0; // in milliseconds
+    printf("%s took %.3f ms %d\n", label, elapsed, port);
 }
