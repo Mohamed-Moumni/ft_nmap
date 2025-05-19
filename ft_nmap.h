@@ -32,6 +32,7 @@
 #define MIN 25000
 #define MAX 65000
 #define MAX_SRV_PORTS 65532
+#define SCAN_STATES 5
 
 #define	ALL_SCAN  -1
 #define	SYN_SCAN  0
@@ -207,8 +208,9 @@ int					FNX_handler(const u_char *packet);
 void				scan_add(t_scan **scans, t_scan *new_scan);
 void				port_add(t_port **ports, t_port *new_port);
 int					get_scan_conclusion(t_scan *scans);
-void				update_conculsion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state);
+void				set_conclusion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state);
 void				send_udp_packet(t_socket *src_addr, t_socket *dest_addr, const int send_socket, const int port);
+void				update_conclusion(int *state_counter, int *conclusion, int max_count);
 int					udp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int port, int socket, int scan_type, pcap_t *);
 pcap_t				*return_pcap_handle();
 // ouput

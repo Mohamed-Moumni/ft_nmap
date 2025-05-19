@@ -146,7 +146,7 @@ int tcp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int tc
     return scan_res;
 }
 
-void update_conculsion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state)
+void set_conclusion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state)
 {
     if ((*state_counter) > (*max_state_occur))
     {
@@ -154,6 +154,21 @@ void update_conculsion(int *max_state_occur, int *conclusion, int *state_counter
         *conclusion = scan_state;
     }
 }
+
+void update_conclusion(int *state_counter, int *conclusion, int max_count)
+{
+    if (state_counter[0] == max_count)
+        *conclusion = OPEN;
+    if (state_counter[4] == max_count)
+        *conclusion = OPEN_FILTERED;
+    if (state_counter[3] == max_count)
+        *conclusion = UNFILTERED;
+    if (state_counter[2] == max_count)
+        *conclusion = FILTERED;
+    if (state_counter[1] == max_count)
+        *conclusion = CLOSED;
+}
+
 
 int get_scan_conclusion(t_scan *scans)
 {
@@ -168,22 +183,22 @@ int get_scan_conclusion(t_scan *scans)
         {
         case OPEN:
             state_counter[0]++;
-            update_conculsion(&max_state_occur, &conclusion, &state_counter[0], OPEN);
+            set_conclusion(&max_state_occur, &conclusion, &state_counter[0], OPEN);
             break;
         case CLOSED:
             state_counter[1]++;
-            update_conculsion(&max_state_occur, &conclusion, &state_counter[1], CLOSED);
+            set_conclusion(&max_state_occur, &conclusion, &state_counter[1], CLOSED);
             break;
         case FILTERED:
             state_counter[2]++;
-            update_conculsion(&max_state_occur, &conclusion, &state_counter[2], FILTERED);
+            set_conclusion(&max_state_occur, &conclusion, &state_counter[2], FILTERED);
             break;
         case UNFILTERED:
-            update_conculsion(&max_state_occur, &conclusion, &state_counter[3], UNFILTERED);
+            set_conclusion(&max_state_occur, &conclusion, &state_counter[3], UNFILTERED);
             state_counter[3]++;
             break;
         case OPEN_FILTERED:
-            update_conculsion(&max_state_occur, &conclusion, &state_counter[4], OPEN_FILTERED);
+            set_conclusion(&max_state_occur, &conclusion, &state_counter[4], OPEN_FILTERED);
             state_counter[4]++;
             break;
         default:
@@ -191,5 +206,6 @@ int get_scan_conclusion(t_scan *scans)
         }
         scans = scans->next;
     }
+    update_conclusion(state_counter, &conclusion, max_state_occur);
     return conclusion;
 }
