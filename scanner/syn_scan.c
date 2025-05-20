@@ -120,28 +120,12 @@ int tcp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int tc
     struct bpf_program  fp;
     bpf_u_int32         net = 0;
 
-    Timer t;
-    timer_start(&t);
     if (pcap_compile(handle, &fp, filter, 0, net) == -1)
-    print_error("Couldn't parse filter %s: %s\n", filter, pcap_geterr(handle));
+        print_error("Couldn't parse filter %s: %s\n", filter, pcap_geterr(handle));
     if (pcap_setfilter(handle, &fp) == -1)
-    print_error("Couldn't install filter %s: %s\n", filter, pcap_geterr(handle));
-    timer_stop(&t);
-    timer_print_elapsed(&t, "seting filter", port);
-    
-    printf("\n");
-
-    timer_start(&t);
+        print_error("Couldn't install filter %s: %s\n", filter, pcap_geterr(handle));
     send_tcp_packet(src_addr, dest_addr, socket, port, tcp_flag);
-    timer_stop(&t);
-    timer_print_elapsed(&t, "sending packet", port);
-
-    printf("\n");
-
-    timer_start(&t);
     packet = packet_receive(handle);
-    timer_stop(&t);
-    timer_print_elapsed(&t, "receiving packet", port);
     scan_res = handle_packet(packet, scan_type);
     return scan_res;
 }
