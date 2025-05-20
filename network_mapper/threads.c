@@ -62,27 +62,27 @@ void    *thread_routine(void* arg)
             {
                 case UDP_SCAN:
                     scan_node->state = udp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, port, send_socket, UDP_SCAN, handle);
-                    is_open = scan_node->state != OPEN ? false : true;
+                    check_open_state(scan_node->state, &is_open);
                     break;
                 case NULL_SCAN:
                     scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, 0, port, send_socket, NULL_SCAN, handle);
-                    is_open = scan_node->state != OPEN ? false : true;
+                    check_open_state(scan_node->state, &is_open);
                     break;
                 case ACK_SCAN:
                     scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, TH_ACK, port, send_socket, ACK_SCAN, handle);
-                    is_open = scan_node->state != OPEN ? false : true;
+                    check_open_state(scan_node->state, &is_open);
                     break;
                 case XMAS_SCAN:
                     scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, TH_FIN | TH_PUSH | TH_URG, port, send_socket, XMAS_SCAN, handle);
-                    is_open = scan_node->state != OPEN ? false : true;
+                    check_open_state(scan_node->state, &is_open);
                     break;
                 case FIN_SCAN:
                     scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, TH_FIN, port, send_socket, FIN_SCAN, handle);
-                    is_open = scan_node->state != OPEN ? false : true;
+                    check_open_state(scan_node->state, &is_open);
                     break;
                 case SYN_SCAN:
                     scan_node->state = tcp_scan(routine_arg->src_addr, routine_arg->dest_addr, filter, TH_SYN, port, send_socket, SYN_SCAN, handle);
-                    is_open = scan_node->state != OPEN ? false : true;
+                    check_open_state(scan_node->state, &is_open);
                     break;
                 default:
                     break;
