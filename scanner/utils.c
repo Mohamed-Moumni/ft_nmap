@@ -238,3 +238,11 @@ void timer_print_elapsed(Timer *t, const char *label, int port) {
     double elapsed = seconds * 1000.0 + microseconds / 1000.0; // in milliseconds
     printf("%s took %.3f ms %d\n", label, elapsed, port);
 }
+
+void check_open_state(int scan_state, int *is_open)
+{
+    if (scan_state == OPEN)
+    {
+        *is_open = true;
+    }
+}
