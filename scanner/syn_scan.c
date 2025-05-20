@@ -157,8 +157,6 @@ void set_conclusion(int *max_state_occur, int *conclusion, int *state_counter, c
 
 void update_conclusion(int *state_counter, int *conclusion, int max_count)
 {
-    if (state_counter[0] == max_count)
-        *conclusion = OPEN;
     if (state_counter[4] == max_count)
         *conclusion = OPEN_FILTERED;
     if (state_counter[3] == max_count)
@@ -167,6 +165,8 @@ void update_conclusion(int *state_counter, int *conclusion, int max_count)
         *conclusion = FILTERED;
     if (state_counter[1] == max_count)
         *conclusion = CLOSED;
+    if (state_counter[0] == max_count)
+        *conclusion = OPEN;
 }
 
 
