@@ -223,7 +223,7 @@ void				nmap_print(t_list *nmap_list, int scan_count);
 
 // utils
 t_socket			*get_local_addr(void);
-void				check_open_state(int scan_state, int *is_open);
+void				check_open_state(int scan_state, bool *is_open);
 int					generate_random_id(void);
 double				calculate_scan_time(struct timeval *sending_time);
 

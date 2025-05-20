@@ -239,7 +239,7 @@ void timer_print_elapsed(Timer *t, const char *label, int port) {
     printf("%s took %.3f ms %d\n", label, elapsed, port);
 }
 
-void check_open_state(int scan_state, int *is_open)
+void check_open_state(int scan_state, bool *is_open)
 {
     if (scan_state == OPEN)
     {
