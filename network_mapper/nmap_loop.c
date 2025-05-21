@@ -53,7 +53,6 @@ void nmap_loop(t_input *nmap_input)
 			if (!nmap_input->thread_count)
 			{
 				// main thread (main Process)
-		
 				routine_arg = malloc(sizeof(t_routine_arg));
 				routine_arg->nmap = (t_nmap *)nmap_list_node->data;
 				routine_arg->scans = nmap_input->scans;

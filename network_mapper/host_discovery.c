@@ -52,6 +52,7 @@ int send_recv(char *packet, t_icmp_header *icmp_header, char *ipaddr, struct soc
 		printf("sendto error: %ld. ip addr: %s\n", ret, ipaddr);
 		return false;
 	}
+
 	struct sockaddr_in reply_addr;
 	socklen_t len = sizeof(reply_addr);
 	ssize_t bytes_recv = recvfrom(sockfd, buffer, sizeof(buffer), 0, (struct sockaddr *)&reply_addr, &len);
@@ -61,15 +62,10 @@ int send_recv(char *packet, t_icmp_header *icmp_header, char *ipaddr, struct soc
 		return false;
 	}
 	close(sockfd);
-	// timer = get_time() - start_time;
-	// printf("echo reply recieved\n");
 	struct iphdr   *ip_hdr = (struct iphdr*)buffer;
 	struct icmp_header *icmp_reply = (struct icmp_header *)(buffer + (ip_hdr->ihl * 4));
-	// printf("------------------------------------------------------\n");
-	if (icmp_reply->type == ICMP_ECHOREPLY)
+	if (icmp_reply->type == ICMP_ECHOREPLY || icmp_reply->type == ICMP_ECHO)
 		return true;
-	// printf("recv: %li type: %d code: %d sequence: %d checksum: %d id: %d\n", bytes_recv, icmp_reply->type, icmp_reply->code, icmp_reply->sequence, icmp_reply->checksum, icmp_reply->id);
-	// printf("sent: %li type: %d code: %d sequence: %d checksum: %d id: %d\n", ret, icmp_header->type, icmp_header->code, icmp_header->sequence, icmp_header->checksum, icmp_header->id);
 	return false;
 }
 
