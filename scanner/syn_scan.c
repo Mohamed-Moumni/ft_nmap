@@ -5,7 +5,7 @@ bool check_time_out(struct timeval *start_time)
     struct timeval  current_time;
 
     gettimeofday(&current_time, NULL);
-    if (current_time.tv_sec - start_time->tv_sec >= 4)
+    if (current_time.tv_sec - start_time->tv_sec >= 2)
         return true;
     return false;
 }
@@ -126,13 +126,18 @@ int tcp_scan(t_socket *src_addr, t_socket *dest_addr, const char *filter, int tc
         print_error("Couldn't install filter %s: %s\n", filter, pcap_geterr(handle));
     send_tcp_packet(src_addr, dest_addr, socket, port, tcp_flag);
     packet = packet_receive(handle);
+    if (!packet)
+    {
+        send_tcp_packet(src_addr, dest_addr, socket, port, tcp_flag);
+        packet = packet_receive(handle);
+    }
     scan_res = handle_packet(packet, scan_type);
     return scan_res;
 }
 
 void set_conclusion(int *max_state_occur, int *conclusion, int *state_counter, const int scan_state)
 {
-    if ((*state_counter) > (*max_state_occur))
+    if ((*state_counter) >= (*max_state_occur))
     {
         (*max_state_occur) = (*state_counter);
         *conclusion = scan_state;

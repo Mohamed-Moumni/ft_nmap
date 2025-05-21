@@ -69,6 +69,7 @@ int send_recv(char *packet, t_icmp_header *icmp_header, char *ipaddr, struct soc
 	return false;
 }
 
+
 bool host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len)
 {
 	t_icmp_header   icmp_header;
@@ -76,26 +77,15 @@ bool host_discovery(char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len)
 	char            random_data[] = "hoho teyoo jotaroo spinoza rigor giga matich ma3ert layer";
 	char            *data;
 	int				seq = 1;
-	int             value = 1;
-	t_socket		*src_addr = get_local_addr();
-	t_socket		*dest_addr = malloc(sizeof(struct sockaddr_in));
-	int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-	pcap_t          *handle = return_pcap_handle();
-	
-	setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL, &value, sizeof(value));
-	dest_addr->sock_addr = (struct sockaddr_in *)sockaddr;
-	dest_addr->sock_len = addr_len;
+
 	data = packet + sizeof(icmp_header);
 	memset(data, 0, 56);
 	memcpy(data, random_data, strlen(random_data));
 	icmp_header = craft_icmp_header(seq);
 	memcpy(packet, &icmp_header, sizeof(icmp_header));
+
 	icmp_header.checksum = checksum((unsigned short *)packet, sizeof(icmp_header) + 56);
 	memcpy(packet, &icmp_header, sizeof(icmp_header));
 	memcpy(packet + sizeof(icmp_header), data, 56);
-	tcp_scan(src_addr, dest_addr, build_filter(ipaddr, 443), TH_SYN, 443, sockfd, SYN_SCAN, handle);
-	tcp_scan(src_addr, dest_addr, build_filter(ipaddr, 80), TH_ACK, 80, sockfd, ACK_SCAN, handle);
-	free(dest_addr);
-	pcap_close(handle);
 	return send_recv(packet, &icmp_header, ipaddr, sockaddr, addr_len);
 }
