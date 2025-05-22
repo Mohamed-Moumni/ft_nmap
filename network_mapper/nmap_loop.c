@@ -98,7 +98,6 @@ void nmap_loop(t_input *nmap_input)
 					remainder = remainder > 0 ? 0 : remainder;
 					offset += routine_arg->port_range;
 					free(thread);
-					printf("\n---------------------\n");
 				}
 				join_threads(threads, (t_nmap **)&nmap_list_node->data);
 				list_free(&threads);

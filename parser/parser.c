@@ -19,6 +19,8 @@ bool    parse_ip_file(char  *param, t_input *input)
         return (false);
     }
     char *line = get_next_line(fd);
+    if (!line)
+        return false;
     while (line)
     {
         if (!parse_ip_hostname(line, input))
