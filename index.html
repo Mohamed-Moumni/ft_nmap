@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ft_nmap - Network Reconnaissance Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --scan-green: #00ff00;
+            --terminal-green: #33ff33;
+            --warning-red: #ff3333;
+            --info-cyan: #00ffff;
+            --dark: #0a0f0a;
+            --darker: #050705;
+            --gray: #88aa88;
+            --light: #e0ffe0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier Prime', monospace;
+            background: var(--darker);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Scanning lines effect */
+        .scan-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 2px,
+                rgba(0, 255, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+            animation: scanMove 8s linear infinite;
+        }
+
+        @keyframes scanMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        /* Radar sweep */
+        .radar-bg {
+            position: fixed;
+            top: -50%;
+            right: -10%;
+            width: 80%;
+            height: 150%;
+            background: radial-gradient(
+                circle at center,
+                rgba(0, 255, 0, 0.05) 0%,
+                transparent 50%
+            );
+            animation: radarSweep 8s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes radarSweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 0;
+            background: rgba(10, 15, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--scan-green);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 255, 0, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--scan-green);
+            text-decoration: none;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-shadow: 0 0 10px var(--scan-green);
+        }
+
+        .logo::before {
+            content: '◉';
+            animation: pulse 2s ease-in-out infinite;
+            font-size: 2rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--scan-green);
+            text-shadow: 0 0 5px var(--scan-green);
+        }
+
+        .nav-links a::before {
+            content: '[';
+            position: absolute;
+            left: -15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-links a::after {
+            content: ']';
+            position: absolute;
+            right: -15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-links a:hover::before,
+        .nav-links a:hover::after {
+            opacity: 1;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 8rem 0 6rem;
+            position: relative;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid var(--scan-green);
+            color: var(--scan-green);
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: var(--scan-green);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 20px var(--scan-green);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            letter-spacing: 0.05em;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 2px solid;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--scan-green);
+            color: var(--darker);
+            border-color: var(--scan-green);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--scan-green);
+            border-color: var(--scan-green);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        /* Terminal Demo */
+        .terminal-section {
+            padding: 4rem 0;
+            animation: fadeInUp 0.8s ease-out 0.8s both;
+        }
+
+        .terminal {
+            background: rgba(5, 7, 5, 0.95);
+            border: 2px solid var(--scan-green);
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--scan-green), var(--terminal-green));
+            z-index: -1;
+            animation: borderPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes borderPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        .terminal-header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--scan-green);
+        }
+
+        .terminal-title {
+            color: var(--scan-green);
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .terminal-title::before {
+            content: '▶';
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .terminal-body {
+            padding: 2rem;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .terminal-line {
+            display: block;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: typeIn 0.5s ease-out forwards;
+        }
+
+        .terminal-line:nth-child(1) { animation-delay: 0.5s; }
+        .terminal-line:nth-child(2) { animation-delay: 0.8s; }
+        .terminal-line:nth-child(3) { animation-delay: 1.1s; }
+        .terminal-line:nth-child(4) { animation-delay: 1.4s; }
+        .terminal-line:nth-child(5) { animation-delay: 1.7s; }
+        .terminal-line:nth-child(6) { animation-delay: 2s; }
+        .terminal-line:nth-child(7) { animation-delay: 2.3s; }
+        .terminal-line:nth-child(8) { animation-delay: 2.6s; }
+
+        @keyframes typeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .prompt { color: var(--scan-green); font-weight: bold; }
+        .scanning { color: var(--terminal-green); }
+        .open { color: var(--scan-green); }
+        .closed { color: var(--warning-red); }
+        .info { color: var(--info-cyan); }
+
+        /* Features */
+        .features {
+            padding: 6rem 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 0, 0.02) 100%);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid var(--scan-green);
+            color: var(--scan-green);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+
+        .section-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--scan-green);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px var(--scan-green);
+        }
+
+        .section-subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(5, 7, 5, 0.8);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 0;
+            background: var(--scan-green);
+            transition: height 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--scan-green);
+            transform: translateX(5px);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+        }
+
+        .feature-card:hover::before {
+            height: 100%;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--scan-green);
+        }
+
+        .feature-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--scan-green);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .feature-desc {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            padding: 6rem 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .tech-card {
+            background: rgba(5, 7, 5, 0.8);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            padding: 2rem;
+        }
+
+        .tech-title {
+            color: var(--scan-green);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .tech-list {
+            list-style: none;
+        }
+
+        .tech-list li {
+            padding: 0.5rem 0;
+            color: var(--gray);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tech-list li::before {
+            content: '▹';
+            color: var(--scan-green);
+        }
+
+        /* Applications */
+        .applications {
+            padding: 6rem 0;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .app-card {
+            background: rgba(5, 7, 5, 0.8);
+            border-left: 4px solid var(--scan-green);
+            padding: 2rem;
+        }
+
+        .app-card h3 {
+            color: var(--scan-green);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .app-card p {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+
+        /* CTA */
+        .cta-section {
+            padding: 8rem 0;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--scan-green);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px var(--scan-green);
+        }
+
+        .cta-description {
+            color: var(--gray);
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            border-top: 2px solid var(--scan-green);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .footer-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--scan-green);
+            text-shadow: 0 0 5px var(--scan-green);
+        }
+
+        .copyright {
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .cta-title {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-lines"></div>
+    <div class="radar-bg"></div>
+
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">ft_nmap</a>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#tech">Tech</a></li>
+                        <li><a href="#apps">Applications</a></li>
+                        <li><a href="https://github.com/Mohamed-Moumni/ft_nmap" target="_blank">GitHub</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="status-badge">[ACTIVE SCAN]</div>
+                <h1>Network<br>Port Scanner</h1>
+                <p class="hero-subtitle">
+                    Fast, multi-threaded port scanner implementing TCP scanning techniques. 
+                    Educational reimplementation of nmap core functionality in C.
+                </p>
+                <div class="cta-group">
+                    <a href="https://github.com/Mohamed-Moumni/ft_nmap" target="_blank" class="btn btn-primary">
+                        View Repository →
+                    </a>
+                    <a href="#features" class="btn btn-secondary">
+                        See Features
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="terminal-section">
+            <div class="container">
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-title">Scan in Progress</div>
+                    </div>
+                    <div class="terminal-body">
+                        <span class="terminal-line"><span class="prompt">root@scanner:~$</span> ./ft_nmap -p 1-1000 192.168.1.100</span>
+                        <span class="terminal-line scanning">Starting ft_nmap scan...</span>
+                        <span class="terminal-line info">Target: 192.168.1.100</span>
+                        <span class="terminal-line info">Ports: 1-1000 | Threads: 8</span>
+                        <span class="terminal-line"><span class="open">PORT   STATE   SERVICE</span></span>
+                        <span class="terminal-line"><span class="open">22/tcp open    ssh</span></span>
+                        <span class="terminal-line"><span class="open">80/tcp open    http</span></span>
+                        <span class="terminal-line"><span class="open">443/tcp open   https</span></span>
+                        <span class="terminal-line scanning">Scan complete. 3 ports open, 997 closed</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-tag">[CAPABILITIES]</div>
+                    <h2 class="section-title">Core Features</h2>
+                    <p class="section-subtitle">
+                        Fast, reliable port scanning with modern concurrency techniques
+                    </p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3 class="feature-title">Multi-Threaded Scanning</h3>
+                        <p class="feature-desc">
+                            Concurrent scanning across multiple ports using POSIX threads. 
+                            Parallel execution significantly reduces scan time while maintaining accuracy.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3 class="feature-title">TCP Connect Scanning</h3>
+                        <p class="feature-desc">
+                            Full TCP connection establishment to determine port states. 
+                            Identifies open, closed, and filtered ports across target networks.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3 class="feature-title">Multiple Target Support</h3>
+                        <p class="feature-desc">
+                            Scan multiple hosts from IP lists or ranges. Batch scanning 
+                            capabilities for efficient network-wide reconnaissance.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3 class="feature-title">Service Identification</h3>
+                        <p class="feature-desc">
+                            Common service detection on discovered ports. Maps well-known ports 
+                            to their typical services (HTTP, SSH, FTP, etc.).
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3 class="feature-title">Flexible Port Ranges</h3>
+                        <p class="feature-desc">
+                            Specify custom port ranges or scan all 65,535 ports. 
+                            Target specific services or perform comprehensive scans.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">⚙️</div>
+                        <h3 class="feature-title">Clean Output</h3>
+                        <p class="feature-desc">
+                            Clear, organized scan results showing port states and services.
+                            Machine-readable format for integration with other tools.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tech-stack" id="tech">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-tag">[IMPLEMENTATION]</div>
+                    <h2 class="section-title">Technical Architecture</h2>
+                </div>
+
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <h3 class="tech-title">Core Technologies</h3>
+                        <ul class="tech-list">
+                            <li>C Programming Language</li>
+                            <li>POSIX Threads (pthread)</li>
+                            <li>TCP Socket Programming</li>
+                            <li>Network I/O Operations</li>
+                            <li>Signal Handling</li>
+                        </ul>
+                    </div>
+
+                    <div class="tech-card">
+                        <h3 class="tech-title">Network Layer</h3>
+                        <ul class="tech-list">
+                            <li>TCP Connection Scanning</li>
+                            <li>Port State Detection</li>
+                            <li>Socket Management</li>
+                            <li>Timeout Handling</li>
+                            <li>Connection Pooling</li>
+                        </ul>
+                    </div>
+
+                    <div class="tech-card">
+                        <h3 class="tech-title">Concurrency Model</h3>
+                        <ul class="tech-list">
+                            <li>Thread Pool Architecture</li>
+                            <li>Parallel Port Scanning</li>
+                            <li>Resource Management</li>
+                            <li>Thread Synchronization</li>
+                            <li>Lock-Free Structures</li>
+                        </ul>
+                    </div>
+
+                    <div class="tech-card">
+                        <h3 class="tech-title">Input Processing</h3>
+                        <ul class="tech-list">
+                            <li>IP Range Parsing</li>
+                            <li>Port Specification</li>
+                            <li>Target File Reading</li>
+                            <li>Configuration Management</li>
+                            <li>Argument Validation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="applications" id="apps">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-tag">[USE CASES]</div>
+                    <h2 class="section-title">Practical Applications</h2>
+                    <p class="section-subtitle">
+                        Real-world scenarios where network port scanning is essential
+                    </p>
+                </div>
+
+                <div class="app-grid">
+                    <div class="app-card">
+                        <h3>🔍 Network Discovery</h3>
+                        <p>
+                            Map active hosts and services on a network. Discover what's running 
+                            where, identify unexpected services, and build a complete network inventory.
+                        </p>
+                    </div>
+
+                    <div class="app-card">
+                        <h3>🔒 Security Assessment</h3>
+                        <p>
+                            Audit network security posture by identifying exposed services. 
+                            Find unnecessary open ports and verify firewall configurations 
+                            are working as intended.
+                        </p>
+                    </div>
+
+                    <div class="app-card">
+                        <h3>🐛 Troubleshooting</h3>
+                        <p>
+                            Diagnose connectivity issues by checking if services are accessible. 
+                            Quickly verify if a port is open or blocked when debugging 
+                            network problems.
+                        </p>
+                    </div>
+
+                    <div class="app-card">
+                        <h3>📊 Service Monitoring</h3>
+                        <p>
+                            Verify service availability by checking if expected ports are open. 
+                            Integrate into monitoring scripts to detect when services go down.
+                        </p>
+                    </div>
+
+                    <div class="app-card">
+                        <h3>🎓 Learning Tool</h3>
+                        <p>
+                            Educational implementation for understanding network protocols, 
+                            socket programming, and how port scanners work under the hood.
+                        </p>
+                    </div>
+
+                    <div class="app-card">
+                        <h3>🔧 Systems Programming</h3>
+                        <p>
+                            Demonstrates multi-threaded programming, network I/O, resource 
+                            management, and building performant low-level network tools in C.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2 class="cta-title">Explore The Code</h2>
+                <p class="cta-description">
+                    Dive into the implementation, examine the multi-threaded architecture, 
+                    and see how port scanning works at the systems programming level.
+                </p>
+                <div class="cta-group" style="justify-content: center;">
+                    <a href="https://github.com/Mohamed-Moumni/ft_nmap" target="_blank" class="btn btn-primary">
+                        View Repository →
+                    </a>
+                    <a href="https://github.com/Mohamed-Moumni/ft_nmap/blob/main/README.md" target="_blank" class="btn btn-secondary">
+                        Documentation
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="copyright">
+                    © 2026 Mohamed Moumni • Systems & Network Programming
+                </div>
+                <ul class="footer-links">
+                    <li><a href="https://github.com/Mohamed-Moumni/ft_nmap" target="_blank">GitHub</a></li>
+                    <li><a href="https://github.com/Mohamed-Moumni" target="_blank">Portfolio</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
