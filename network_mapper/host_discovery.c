@@ -35,7 +35,6 @@ unsigned short checksum(void *b, int len)
 
 int send_recv(char *packet, t_icmp_header *icmp_header, char *ipaddr, struct sockaddr *sockaddr, socklen_t addr_len)
 {
-	// long long   start_time;
 	char        buffer[4096];
 	int			sockfd;
 
@@ -45,7 +44,6 @@ int send_recv(char *packet, t_icmp_header *icmp_header, char *ipaddr, struct soc
 		printf("socket error %d\n", sockfd);
 		return false;
 	}
-	// start_time = get_time();
 	ssize_t ret = sendto(sockfd, packet, sizeof(icmp_header) + 56, 0, sockaddr, addr_len);
 	if (ret  < 0)
 	{
