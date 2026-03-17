@@ -56,7 +56,7 @@ bool	parse_ip_hostname(char *param, t_input *input)
 	{
 		if (!validate_ipaddr(splited))
 			return false;
-		struct sockaddr_in *server_addr = malloc(sizeof(struct sockadd_in *));
+		struct sockaddr_in *server_addr = malloc(sizeof(struct sockadd_in));
 		server_addr->sin_family = AF_INET;
 		if (inet_pton(AF_INET, param, &server_addr->sin_addr) <= 0)
 		{
